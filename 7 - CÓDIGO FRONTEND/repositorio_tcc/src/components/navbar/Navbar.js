@@ -48,6 +48,22 @@ export default class Navbar extends Component {
                   <li className="nav-item">
                     <Link to="/users" className={`nav-link ${this.state.currentPageLink === 'users' ? 'active' : ''}`}>Usuários</Link>
                   </li>
+                  <li className="nav-item dropdown">
+                  <a className="nav-link dropdown-toggle" href="#" id="tccDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">TCC 1</a>
+                  <ul className="dropdown-menu" aria-labelledby="tccDropdown">
+                    <li><Link to="/tcc1/solicitar-orientador" className="dropdown-item">Solicitar Orientador</Link></li>
+                    <li><Link to="/tcc1/entrega-parte1" className="dropdown-item">Primeira Entrega</Link></li>
+                    <li><Link to="/tcc1/entrega-parte2" className="dropdown-item">Segunda Entrega</Link></li>
+                  </ul>
+                </li>
+                <li className="nav-item dropdown">
+                  <a className="nav-link dropdown-toggle" href="#" id="tcc2Dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">TCC 2</a>
+                  <ul className="dropdown-menu" aria-labelledby="tcc2Dropdown">
+                    <li><Link to="/tcc2/solicitar-orientador" className="dropdown-item">Solicitar Orientador</Link></li>
+                    <li><Link to="/tcc2/entrega-parte1" className="dropdown-item">Primeira Entrega</Link></li>
+                    <li><Link to="/tcc2/entrega-parte2" className="dropdown-item">Segunda Entrega</Link></li>
+                  </ul>
+                </li>
                 </ul>
               </div>
             </div>
