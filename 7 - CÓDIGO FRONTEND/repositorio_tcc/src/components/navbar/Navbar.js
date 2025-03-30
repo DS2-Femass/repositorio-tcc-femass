@@ -48,27 +48,13 @@ export default class Navbar extends Component {
                   <li className="nav-item">
                     <Link to="/users" className={`nav-link ${this.state.currentPageLink === 'users' ? 'active' : ''}`}>Usuários</Link>
                   </li>
-                  <li className="nav-item dropdown">
-                  <a className="nav-link dropdown-toggle" href="#" id="tccDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">TCC 1</a>
-                  <ul className="dropdown-menu" aria-labelledby="tccDropdown">
-                    <li><Link to="/tcc1/solicitar-orientador" className="dropdown-item">Solicitar Orientador</Link></li>
-                    <li><Link to="/tcc1/entrega-parte1" className="dropdown-item">Primeira Entrega</Link></li>
-                    <li><Link to="/tcc1/entrega-parte2" className="dropdown-item">Segunda Entrega</Link></li>
-                  </ul>
-                </li>
-                <li className="nav-item dropdown">
-                  <a className="nav-link dropdown-toggle" href="#" id="tcc2Dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">TCC 2</a>
-                  <ul className="dropdown-menu" aria-labelledby="tcc2Dropdown">
-                    <li><Link to="/tcc2/solicitar-orientador" className="dropdown-item">Solicitar Orientador</Link></li>
-                    <li><Link to="/tcc2/entrega-parte1" className="dropdown-item">Primeira Entrega</Link></li>
-                    <li><Link to="/tcc2/entrega-parte2" className="dropdown-item">Segunda Entrega</Link></li>
-                  </ul>
-                </li>
                 </ul>
               </div>
             </div>
             <div>
-                <button type="button" aria-label="Usuário" className='btn btn-light border-0'><span><i className="bi bi-person-circle fs-2 p-2"></i>Nome Aluno(a)</span></button>
+                <Link to="/perfil" className='btn btn-light border-0'>
+                  <button type="button" aria-label="Usuário" className='btn btn-light border-0'><span><i className="bi bi-person-circle fs-2 p-2"></i>Nome Aluno(a)</span></button>
+                </Link>
                 <button type="button" aria-label="Notificações" className='btn btn-light border-0'><span className='w-100'><i className="bi bi-bell fs-2"></i></span></button>
                 <button type="button" aroa-label="Sair do Sistema" className='btn border-0 btn-light' onClick={this.logout}><span><i className='bi bi-box-arrow-left fs-2'></i></span></button>
             </div>

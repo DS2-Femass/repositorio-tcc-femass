@@ -16,7 +16,7 @@ import ResetPassword from './components/resetPassword/ResetPassword.js';
 import { useLocation } from 'react-router-dom';
 import Categoria from './components/categoria/Categoria.js';
 import MeuTCC from './components/tcc/MeuTCC.js';
-import PrimeiraEntrega from './components/tcc1/primeiraentrega/PrimeiraEntrega.js'
+import Perfil from './components/perfil/Perfil.js';
 
 class App extends React.Component{
   
@@ -47,9 +47,9 @@ class App extends React.Component{
     const ParametrizedResetPasword = (props) => (
       <ResetPassword location={useLocation()} />
     );
-    const ProtectedTCC1EntregaParte1 = (props) => (
-      <ProtectedRoute component={() => <ChangePassword component={PrimeiraEntrega} {...props} />} />
-    )
+    const ProtectedPerfil = (props) => (
+      <ProtectedRoute component={() => <ChangePassword component={Perfil} {...props} />} />
+    );
 
     return (
       <BrowserRouter>
@@ -66,8 +66,7 @@ class App extends React.Component{
             <Route exact path="/categorias" element={<ProtectedCategoria />}></Route>
             <Route exact path="/users" element={<ProtectedUsers />}></Route>
             <Route exact path="/reset-password" element={<ParametrizedResetPasword />}></Route>
-            <Route exact path="/tcc1/entrega-parte1" element={<ProtectedTCC1EntregaParte1 />} />
-
+            <Route exact path="/perfil" element={<ProtectedPerfil />}></Route>
           </Routes>
           <PasswordChangeModal />
         </PasswordModalProvider>
