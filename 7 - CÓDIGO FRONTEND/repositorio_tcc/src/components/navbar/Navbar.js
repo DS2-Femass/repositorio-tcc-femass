@@ -1,10 +1,7 @@
 import React, { Component } from 'react'
 import { Link } from 'react-router-dom'
-import { Dropdown } from 'react-bootstrap'; //importação Dropdown do react-bootstrap
-
 
 export default class Navbar extends Component {
-
 
   logout = () => {
     sessionStorage.removeItem('token');
@@ -12,8 +9,7 @@ export default class Navbar extends Component {
   }
 
   state = {
-    currentPageLink: 'home',
-    solicitacoesPendentes: 1 // Número de solicitações pendentes (pode vir do backend futuramente)
+    currentPageLink: 'home'
   }
 
   componentDidMount() {
@@ -46,73 +42,9 @@ export default class Navbar extends Component {
                   <li className="nav-item">
                     <Link to="/tcc" className={`nav-link ${this.state.currentPageLink === 'tcc' ? 'active' : ''}`}>Trabalhos de Conclusão</Link>
                   </li>
-                    {/* Novo ítem - Solicitações */}
-                    <li className="nav-item">
-                  <Dropdown>
-                    <Dropdown.Toggle variant="transparent" className={`nav-link d-flex align-items-center ${this.state.currentPageLink === 'solicitacoes' ? 'active' : ''}`}>
-                      <span>Solicitações</span>
-                      {this.state.solicitacoesPendentes > 0 && (
-                        <span className="badge bg-danger ms-2">{this.state.solicitacoesPendentes}</span>
-                      )}
-                    </Dropdown.Toggle>
-                    <Dropdown.Menu>
-                      <Dropdown.Item as={Link} to="/solicitacoes"> Visualizar Solicitações
-                      </Dropdown.Item>
-                    </Dropdown.Menu>
-                  </Dropdown>
-                </li>
                   <li className="nav-item">
                     <Link to="/meu-tcc" className={`nav-link ${this.state.currentPageLink === 'meu-tcc' ? 'active' : ''}`}>Meu TCC</Link>
                   </li>
-                {/* Submenu dentro da opção Meu TCC */}
-                <li className="nav-item">
-                  <Dropdown>
-                    <Dropdown.Toggle className={`nav-link ${this.state.currentPageLink === 'meu-tcc' ? 'active' : ''}`} variant="transparent">
-                      Meu TCC
-                    </Dropdown.Toggle>
-                    <Dropdown.Menu>
-                      <Dropdown.Item as={Link} to="/meu-tcc">Visualizar Meu TCC</Dropdown.Item>
-                      <Dropdown.Item as={Link} to="/solicitar-orientador">Solicitar Orientador</Dropdown.Item>
-                    </Dropdown.Menu>
-                  </Dropdown>
-                </li>
-                  {/* Novo ítem - Alunos Orientados */}
-                  <li className="nav-item">
-                    <Dropdown>
-                      <Dropdown.Toggle variant="transparent" className={`nav-link d-flex align-items-center ${this.state.currentPageLink === 'alunos-orientados' ? 'active' : ''}`}>
-                    <i className="bi bi-person-check me-2"></i> {/* Ícone de alunos orientados */}
-                    <span>Alunos Orientados</span>
-                    </Dropdown.Toggle>
-                   <Dropdown.Menu>
-                  <Dropdown.Item as={Link} to="/alunos-orientados">Visualizar Orientandos</Dropdown.Item>
-                 </Dropdown.Menu>
-                </Dropdown>
-                </li>
-                  {/* Novo ítem - visualização gerenciamento de entregas professor */}
-                   <li className="nav-item">
-                  <Dropdown>
-                    <Dropdown.Toggle variant="transparent" className={`nav-link d-flex align-items-center ${this.state.currentPageLink === 'gerenciamento-entregas' ? 'active' : ''}`}>
-                      <i className="bi bi-folder-check me-2"></i> {/* Ícone de gerenciamento */}
-                      <span>Entregas</span>
-                    </Dropdown.Toggle>
-                    <Dropdown.Menu>
-                      <Dropdown.Item as={Link} to="/gerenciamento-entregas">Visualizar Entregas</Dropdown.Item>
-                    </Dropdown.Menu>
-                  </Dropdown>
-                </li>
-                      {/* Novo ítem - Entregas*/}
-                     <li className="nav-item">
-                    <Dropdown>
-                      <Dropdown.Toggle variant="transparent" className={`nav-link d-flex align-items-center ${this.state.currentPageLink === 'entregas' ? 'active' : ''}`}>
-                        <i className="bi bi-upload me-2"></i> {/* Ícone de upload */}
-                        <span>Entregas</span>
-                      </Dropdown.Toggle>
-                      <Dropdown.Menu>
-                        <Dropdown.Item as={Link} to="/entregas">Minhas Entregas</Dropdown.Item>
-                      </Dropdown.Menu>
-                    </Dropdown>
-                  </li>
-
                   <li className="nav-item">
                     <Link to="/users" className={`nav-link ${this.state.currentPageLink === 'users' ? 'active' : ''}`}>Usuários</Link>
                   </li>
