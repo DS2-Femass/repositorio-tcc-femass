@@ -3,7 +3,7 @@ name: Build, Push Docker Compose Application and Create Release
 on:
   push:
     branches:
-      - main
+      - fixActions
   workflow_dispatch:
 
 jobs:
@@ -32,87 +32,51 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
 
-      # Step 5: Build the Docker image
-      - name: Build Docker Image
-        run: |
-          cd "6 - CÓDIGO BACKEND/repositorio_tcc"
-          docker build -t conecta-memory .
-
-      # Step 6: Start Application and Database
-      - name: Start Application and Database
-        run: |
-          cd "6 - CÓDIGO BACKEND/repositorio_tcc"
-          docker-compose up -d
-
-      # Step 7: Wait for Database to be Ready
-      - name: Wait for Database
-        run: |
-          echo "Waiting for database to be ready..."
-          sleep 30  # Ajuste o tempo conforme necessário
-
-      # Step 8: Run Maven Build inside the Maven Container
-      - name: Build Java Project
-        run: |
-          cd "6 - CÓDIGO BACKEND/repositorio_tcc"
-          docker run --rm \
-            -v "${{ github.workspace }}/6 - CÓDIGO BACKEND/repositorio_tcc:/app" \
-            -w /app \
-            maven:3-eclipse-temurin-22-alpine \
-            mvn package -DskipTests
-
-      # Step 9: Build and push Docker images using docker-compose
+      # Step 5: Build and push Docker images using docker-compose
       - name: Build and push Docker images
         run: |
           cd "6 - CÓDIGO BACKEND/repositorio_tcc"
           docker-compose build
           docker-compose push
+          # Tag the image before pushing.  Important for releases.
+          IMAGE_NAME="conecta-memory" # Set this to your image name
+          VERSION="v$(date +%Y%m%d-%H%M%S)" # Generate a unique version.  Consider using git tags.
+          docker tag $IMAGE_NAME:$${GITHUB_SHA::7} $DOCKERHUB_USERNAME/$IMAGE_NAME:$VERSION # Tag with short commit hash
+          docker push $DOCKERHUB_USERNAME/$IMAGE_NAME:$VERSION # Push the tagged image
 
-      # Step 10: Generate a random release version
+      # Step 6: Generate a random release version
       - name: Generate Random Release Version
         id: random_version
         run: |
-          RANDOM_VERSION=$(shuf -i 1-1000 -n 1)
-          echo "Generated random version: v$RANDOM_VERSION"
-          echo "RELEASE_VERSION=v$RANDOM_VERSION" >> $GITHUB_ENV
+          # Generate a more semantic version, consider using git describe --tags
+          VERSION="v$(date +%Y%m%d-%H%M%S)"
+          echo "Generated version: $VERSION"
+          echo "RELEASE_VERSION=$VERSION" >> $GITHUB_ENV
+          echo "IMAGE_TAG=$VERSION" >> $GITHUB_ENV # Store image tag for release
 
-      # Step 11: Create Release only if it doesn't exist
+      # Step 7: Create Release only if it doesn't exist
       - name: Create Release
         id: create_release
-        run: |
-          if git tag | grep -q "${{ env.RELEASE_VERSION }}"; then
-            echo "Tag ${{ env.RELEASE_VERSION }} já existe. Nenhuma nova release será criada."
-            echo "exists=true" >> $GITHUB_ENV
-          else
-            echo "Criando nova release..."
-            response=$(curl -s -X POST \
-              -H "Authorization: token ${{ secrets.TOKEN }}" \
-              -H "Accept: application/vnd.github.v3+json" \
-              -d "{\"tag_name\":\"${{ env.RELEASE_VERSION }}\",\"name\":\"Release ${{ env.RELEASE_VERSION }}\",\"draft\":false,\"prerelease\":false}" \
-              "https://api.github.com/repos/${{ github.repository }}/releases")
+        uses: actions/create-release@v1 # Use the official action.  Much simpler.
+        env:
+          GITHUB_TOKEN: ${{ secrets.TOKEN }}
+        with:
+          tag_name: ${{ env.RELEASE_VERSION }}
+          release_name: Release ${{ env.RELEASE_VERSION }}
+          draft: false
+          prerelease: false
+          body: |
+            Release of version ${{ env.RELEASE_VERSION }}.
+            Docker image tag: `$DOCKERHUB_USERNAME/conecta-memory:${{ env.IMAGE_TAG }}` # Include image tag in release notes
 
-            upload_url=$(echo "$response" | jq -r '.upload_url' | sed -e "s/{?name,label}//")
-            echo "Upload URL: $upload_url"
-            echo "exists=false" >> $GITHUB_ENV
-            echo "upload_url=$upload_url" >> $GITHUB_ENV
-          fi
-
-      # Step 12: Upload Release Asset
+      # Step 8: (Optional) Upload Release Asset (JAR file)
       - name: Upload Release Asset
-        if: env.exists == 'false'
-        run: |
-          echo "Verificando a existência do arquivo .jar..."
-          ls -l "./6 - CÓDIGO BACKEND/repositorio_tcc/target/"
-          
-          if [ ! -f "./6 - CÓDIGO BACKEND/repositorio_tcc/target/repositorioDeTcc-0.0.1-SNAPSHOT.jar" ]; then
-            echo "Arquivo .jar não encontrado. Abortando o upload."
-            exit 1
-          fi
-          
-          echo "Uploading asset..."
-          response=$(curl -X POST \
-            -H "Authorization: token ${{ secrets.TOKEN }}" \
-            -H "Content-Type: application/java-archive" \
-            --data-binary @"./6 - CÓDIGO BACKEND/repositorio_tcc/target/repositorioDeTcc-0.0.1-SNAPSHOT.jar" \
-            "${{ env.upload_url }}?name=repositorioDeTcc-0.0.1-SNAPSHOT.jar")  # Adicione o nome do arquivo aqui
-          
-          echo "Response: $response"
+        if: steps.create_release.outputs.upload_url # Only if release was created.
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./6 - CÓDIGO BACKEND/repositorio_tcc/target/repositorioDeTcc-0.0.1-SNAPSHOT.jar # Path to your JAR
+          asset_name: repositorioDeTcc-0.0.1-SNAPSHOT.jar
+          asset_content_type: application/java-archive
