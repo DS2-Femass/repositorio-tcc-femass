@@ -36,13 +36,13 @@ jobs:
       - name: Build and push Docker images
         run: |
           cd "6 - CÓDIGO BACKEND/repositorio_tcc"
-          # Build the image
-          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/conecta-memory .
-          # Tag the image
+          # Build the image and tag it with the username
+          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/conecta-memory:latest .
+          # Tag the image with a version
           VERSION="v$(date +%Y%m%d-%H%M%S)"
           echo "VERSION=$VERSION" >> $GITHUB_ENV
           docker tag ${{ secrets.DOCKERHUB_USERNAME }}/conecta-memory:latest ${{ secrets.DOCKERHUB_USERNAME }}/conecta-memory:$VERSION
-          # Push the image
+          # Push the image with the version tag
           docker push ${{ secrets.DOCKERHUB_USERNAME }}/conecta-memory:$VERSION
           echo "IMAGE_TAG=$VERSION" >> $GITHUB_ENV # For use in release
 
