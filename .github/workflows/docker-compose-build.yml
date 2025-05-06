@@ -3,7 +3,7 @@ name: Build, Push Docker Compose Application and Create Release
 on:
   push:
     branches:
-      - main
+      - fixActions
   workflow_dispatch:
 
 jobs:
