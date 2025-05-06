@@ -3,7 +3,7 @@ name: Build, Push Docker Compose Application and Create Release
 on:
   push:
     branches:
-      - fixActions
+      - main
   workflow_dispatch:
 
 jobs:
@@ -32,32 +32,30 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
 
-      # Step 5: Build and push Docker images using docker-compose
+      # Step 5: Build and push Docker images
       - name: Build and push Docker images
         run: |
           cd "6 - CÓDIGO BACKEND/repositorio_tcc"
-          docker-compose build
-          docker-compose push
-          # Tag the image before pushing.  Important for releases.
-          IMAGE_NAME="conecta-memory" # Set this to your image name
-          VERSION="v$(date +%Y%m%d-%H%M%S)" # Generate a unique version.  Consider using git tags.
-          docker tag $IMAGE_NAME:$${GITHUB_SHA::7} $DOCKERHUB_USERNAME/$IMAGE_NAME:$VERSION # Tag with short commit hash
-          docker push $DOCKERHUB_USERNAME/$IMAGE_NAME:$VERSION # Push the tagged image
+          # Build the image
+          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/conecta-memory .
+          # Tag the image
+          VERSION="v$(date +%Y%m%d-%H%M%S)"
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+          docker tag ${{ secrets.DOCKERHUB_USERNAME }}/conecta-memory:latest ${{ secrets.DOCKERHUB_USERNAME }}/conecta-memory:$VERSION
+          # Push the image
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/conecta-memory:$VERSION
+          echo "IMAGE_TAG=$VERSION" >> $GITHUB_ENV # For use in release
 
       # Step 6: Generate a random release version
       - name: Generate Random Release Version
         id: random_version
         run: |
-          # Generate a more semantic version, consider using git describe --tags
-          VERSION="v$(date +%Y%m%d-%H%M%S)"
-          echo "Generated version: $VERSION"
-          echo "RELEASE_VERSION=$VERSION" >> $GITHUB_ENV
-          echo "IMAGE_TAG=$VERSION" >> $GITHUB_ENV # Store image tag for release
-
+          echo "Generated random version: ${{ env.VERSION }}"
+          echo "RELEASE_VERSION=${{ env.VERSION }}" >> $GITHUB_ENV
       # Step 7: Create Release only if it doesn't exist
       - name: Create Release
         id: create_release
-        uses: actions/create-release@v1 # Use the official action.  Much simpler.
+        uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.TOKEN }}
         with:
@@ -67,16 +65,16 @@ jobs:
           prerelease: false
           body: |
             Release of version ${{ env.RELEASE_VERSION }}.
-            Docker image tag: `$DOCKERHUB_USERNAME/conecta-memory:${{ env.IMAGE_TAG }}` # Include image tag in release notes
+            Docker image tag: ${{ secrets.DOCKERHUB_USERNAME }}/conecta-memory:${{ env.IMAGE_TAG }}
 
-      # Step 8: (Optional) Upload Release Asset (JAR file)
+      # Step 8: Upload Release Asset
       - name: Upload Release Asset
-        if: steps.create_release.outputs.upload_url # Only if release was created.
+        if: steps.create_release.outputs.upload_url
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./6 - CÓDIGO BACKEND/repositorio_tcc/target/repositorioDeTcc-0.0.1-SNAPSHOT.jar # Path to your JAR
+          asset_path: ./6 - CÓDIGO BACKEND/repositorio_tcc/target/repositorioDeTcc-0.0.1-SNAPSHOT.jar
           asset_name: repositorioDeTcc-0.0.1-SNAPSHOT.jar
           asset_content_type: application/java-archive
