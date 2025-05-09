@@ -6,7 +6,7 @@ name: Build Java, Build/Push Docker Image and Create Release
 on:
   push:
     branches:
-      - fixActions # Altere para 'main' ou sua branch principal quando estiver pronto
+      - main 
   workflow_dispatch:
 
 # Permissões necessárias para o GITHUB_TOKEN interagir com releases
