@@ -49,7 +49,7 @@ class Login extends Component {
         return;
     }
 
-    var url = window.server + "auth/login"
+    var url = window.server + "/auth/login"
 
     //verificar se algum dos campos não foi preenchido
     if (!this.state.login || !this.state.password) {
