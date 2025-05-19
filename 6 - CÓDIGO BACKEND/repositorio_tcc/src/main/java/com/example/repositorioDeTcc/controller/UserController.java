@@ -2,10 +2,13 @@ package com.example.repositorioDeTcc.controller;
 
 import com.example.repositorioDeTcc.dto.UserDTO;
 import com.example.repositorioDeTcc.dto.UserForListDTO;
+import com.example.repositorioDeTcc.model.Pessoa;
+import com.example.repositorioDeTcc.model.User;
 import com.example.repositorioDeTcc.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -24,11 +27,23 @@ public class UserController {
         UserForListDTO result = service.findById(id);
         return ResponseEntity.ok().body(result);
     }
-    
+
     @GetMapping
     public ResponseEntity<List<UserForListDTO>> findAll(){
         List<UserForListDTO> result = service.findAll();
         return ResponseEntity.ok().body(result);
+    }
+
+    @GetMapping("/perfil")
+    public ResponseEntity<Pessoa> getPerfil(@AuthenticationPrincipal User user){
+        Pessoa pessoa = user.getPessoa();
+
+        if(pessoa == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        return ResponseEntity.ok(pessoa);
+
     }
 
     @PutMapping(value = "/{id}" , produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)

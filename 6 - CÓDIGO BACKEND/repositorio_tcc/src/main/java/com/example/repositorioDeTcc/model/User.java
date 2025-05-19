@@ -2,13 +2,15 @@ package com.example.repositorioDeTcc.model;
 
 import com.example.repositorioDeTcc.dto.RegisterUserDTO;
 import jakarta.persistence.*;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.web.bind.annotation.GetMapping;
+import lombok.Getter;
+
 
 import java.io.Serializable;
 import java.util.Collection;
@@ -42,6 +44,17 @@ public class User implements Serializable, UserDetails {
 
     @Enumerated(EnumType.STRING)
     private Role role;
+
+    @Getter
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+    private Pessoa pessoa;
+
+    public Pessoa getPessoa() {
+        return this.pessoa;
+    }
+
+
+
 
     public User(String nomeCompleto, String matricula, String email, String password, Role role){
         this.nomeCompleto = nomeCompleto;
