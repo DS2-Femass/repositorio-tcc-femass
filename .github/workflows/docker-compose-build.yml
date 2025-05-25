@@ -1,118 +1,115 @@
-name: Build, Push Docker Compose Application and Create Release
+# .github/workflows/build-push-release.yml
 
+name: Build Java, Build/Push Docker Image and Create Release
+
+# Gatilhos do workflow: push na branch 'fixActions' ou execução manual
 on:
   push:
     branches:
-      - main
+      - main 
   workflow_dispatch:
 
+# Permissões necessárias para o GITHUB_TOKEN interagir com releases
+permissions:
+  contents: write
+
 jobs:
-  build:
+  build_and_release:
     runs-on: ubuntu-latest
 
     steps:
-      # Step 1: Checkout the repository
+      # 1. Checkout do código do repositório
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # Step 2: Set up Docker Buildx (for multi-platform builds)
+      # 2. Configurar o Java Development Kit (JDK) - Versão 22 para alinhar com Dockerfile
+      - name: Set up JDK 22
+        uses: actions/setup-java@v4
+        with:
+          java-version: '22'
+          distribution: 'temurin'
+          cache: 'maven'
+
+      # 3. Construir o projeto Java com Maven (Fonte única do JAR)
+      #    Certifique-se que o pom.xml está no diretório correto
+      - name: Build project with Maven
+        run: |
+          echo "Building project in directory: 6 - CÓDIGO BACKEND/repositorio_tcc"
+          cd "6 - CÓDIGO BACKEND/repositorio_tcc"
+          mvn clean package -DskipTests
+          echo "Maven build completed. JAR should be in ./target/"
+
+      # 4. Configurar o Docker Buildx
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      # Step 3: Install Docker Compose
-      - name: Install Docker Compose
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y docker-compose
-
-      # Step 4: Log in to DockerHub
+      # 5. Fazer login no Docker Hub (Requer secrets DOCKERHUB_USERNAME e DOCKERHUB_PASSWORD)
       - name: Log in to DockerHub
         uses: docker/login-action@v3
         with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          username: ${{ secrets.DOCKERHUB_USERNAME }} # Deve ser 'femassds'
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
 
-      # Step 5: Build the Docker image
-      - name: Build Docker Image
+      # 6. Construir e enviar a imagem Docker para femassds/tccfemass
+      - name: Build and push Docker image
         run: |
-          cd "6 - CÓDIGO BACKEND/repositorio_tcc"
-          docker build -t conecta-memory .
-
-      # Step 6: Start Application and Database
-      - name: Start Application and Database
-        run: |
-          cd "6 - CÓDIGO BACKEND/repositorio_tcc"
-          docker-compose up -d
-
-      # Step 7: Wait for Database to be Ready
-      - name: Wait for Database
-        run: |
-          echo "Waiting for database to be ready..."
-          sleep 30  # Ajuste o tempo conforme necessário
-
-      # Step 8: Run Maven Build inside the Maven Container
-      - name: Build Java Project
-        run: |
-          cd "6 - CÓDIGO BACKEND/repositorio_tcc"
-          docker run --rm \
-            -v "${{ github.workspace }}/6 - CÓDIGO BACKEND/repositorio_tcc:/app" \
-            -w /app \
-            maven:3-eclipse-temurin-22-alpine \
-            mvn package -DskipTests
-
-      # Step 9: Build and push Docker images using docker-compose
-      - name: Build and push Docker images
-        run: |
-          cd "6 - CÓDIGO BACKEND/repositorio_tcc"
-          docker-compose build
-          docker-compose push
-
-      # Step 10: Generate a random release version
-      - name: Generate Random Release Version
-        id: random_version
-        run: |
-          RANDOM_VERSION=$(shuf -i 1-1000 -n 1)
-          echo "Generated random version: v$RANDOM_VERSION"
-          echo "RELEASE_VERSION=v$RANDOM_VERSION" >> $GITHUB_ENV
-
-      # Step 11: Create Release only if it doesn't exist
-      - name: Create Release
-        id: create_release
-        run: |
-          if git tag | grep -q "${{ env.RELEASE_VERSION }}"; then
-            echo "Tag ${{ env.RELEASE_VERSION }} já existe. Nenhuma nova release será criada."
-            echo "exists=true" >> $GITHUB_ENV
-          else
-            echo "Criando nova release..."
-            response=$(curl -s -X POST \
-              -H "Authorization: token ${{ secrets.TOKEN }}" \
-              -H "Accept: application/vnd.github.v3+json" \
-              -d "{\"tag_name\":\"${{ env.RELEASE_VERSION }}\",\"name\":\"Release ${{ env.RELEASE_VERSION }}\",\"draft\":false,\"prerelease\":false}" \
-              "https://api.github.com/repos/${{ github.repository }}/releases")
-
-            upload_url=$(echo "$response" | jq -r '.upload_url' | sed -e "s/{?name,label}//")
-            echo "Upload URL: $upload_url"
-            echo "exists=false" >> $GITHUB_ENV
-            echo "upload_url=$upload_url" >> $GITHUB_ENV
-          fi
-
-      # Step 12: Upload Release Asset
-      - name: Upload Release Asset
-        if: env.exists == 'false'
-        run: |
-          echo "Verificando a existência do arquivo .jar..."
-          ls -l "./6 - CÓDIGO BACKEND/repositorio_tcc/target/"
-          
-          if [ ! -f "./6 - CÓDIGO BACKEND/repositorio_tcc/target/repositorioDeTcc-0.0.1-SNAPSHOT.jar" ]; then
-            echo "Arquivo .jar não encontrado. Abortando o upload."
+          CONTEXT_PATH="6 - CÓDIGO BACKEND/repositorio_tcc"
+          echo "Docker build context path: $CONTEXT_PATH"
+          # Verifica se o diretório de contexto existe
+          if [ ! -d "$CONTEXT_PATH" ]; then
+            echo "::error::Build context path not found: $CONTEXT_PATH"
             exit 1
           fi
-          
-          echo "Uploading asset..."
-          response=$(curl -X POST \
-            -H "Authorization: token ${{ secrets.TOKEN }}" \
-            -H "Content-Type: application/java-archive" \
-            --data-binary @"./6 - CÓDIGO BACKEND/repositorio_tcc/target/repositorioDeTcc-0.0.1-SNAPSHOT.jar" \
-            "${{ env.upload_url }}?name=repositorioDeTcc-0.0.1-SNAPSHOT.jar")  # Adicione o nome do arquivo aqui
-          
-          echo "Response: $response"
+          # Verifica se o JAR (esperado pelo Dockerfile simplificado) existe no contexto
+          # Ajuste este caminho se o JAR tiver nome/local diferente após o build Maven
+          EXPECTED_JAR_PATH="$CONTEXT_PATH/target/repositorioDeTcc-0.0.1-SNAPSHOT.jar"
+          if [ ! -f "$EXPECTED_JAR_PATH" ]; then
+            echo "::warning::Expected JAR file not found at $EXPECTED_JAR_PATH for Docker COPY. Check Maven build output and Dockerfile COPY command."
+            # Você pode decidir parar o build aqui com 'exit 1' se o JAR for essencial para a imagem
+          fi
+
+          IMAGE_NAME="${{ secrets.DOCKERHUB_USERNAME }}/tccfemass" # Nome final da imagem
+          VERSION="v$(date +%Y%m%d-%H%M%S)"
+          echo "Generated Version: $VERSION"
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+
+          # Constrói a imagem usando o Dockerfile simplificado no diretório de contexto
+          docker build -t "${IMAGE_NAME}:latest" -t "${IMAGE_NAME}:${VERSION}" "$CONTEXT_PATH"
+
+          # Envia a imagem com a tag de versão
+          docker push "${IMAGE_NAME}:${VERSION}"
+          # Envia a tag 'latest'
+          docker push "${IMAGE_NAME}:latest"
+
+          echo "IMAGE_TAG=$VERSION" >> $GITHUB_ENV
+          echo "Pushed image: ${IMAGE_NAME}:${VERSION} and ${IMAGE_NAME}:latest"
+
+      # 7. Criar a Release no GitHub
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Token automático do Actions
+        with:
+          tag_name: ${{ env.VERSION }}
+          release_name: Release ${{ env.VERSION }}
+          draft: false
+          prerelease: false
+          body: |
+            Release automática da versão ${{ env.VERSION }}.
+
+            Imagem Docker: ${{ secrets.DOCKERHUB_USERNAME }}/tccfemass:${{ env.IMAGE_TAG }}
+
+      # 8. Fazer upload do artefato (JAR) gerado no passo 3 para a Release
+      - name: Upload Release Asset (JAR file)
+        if: steps.create_release.outputs.upload_url
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          # Caminho exato para o JAR gerado pelo passo 'Build project with Maven'
+          # Verifique se este nome/caminho está correto!
+          asset_path: ./6 - CÓDIGO BACKEND/repositorio_tcc/target/repositorioDeTcc-0.0.1-SNAPSHOT.jar
+          asset_name: repositorioDeTcc-0.0.1-SNAPSHOT.jar # Nome do arquivo na release
+          asset_content_type: application/java-archive

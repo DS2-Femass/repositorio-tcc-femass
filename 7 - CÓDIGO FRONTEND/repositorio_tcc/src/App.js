@@ -22,6 +22,7 @@ import AlunosOrientados from './components/AlunosOrientados/AlunosOrientados';
 import GerenciamentoEntregas from './components/GerenciamentoEntregas/GerenciamentoEntregas'; 
 import Entregas from './components/Entregas/Entregas.js';//entrega do aluno 
 
+import Perfil from './components/perfil/Perfil.js';
 
 class App extends React.Component{
   
@@ -51,6 +52,9 @@ class App extends React.Component{
     );
     const ParametrizedResetPasword = (props) => (
       <ResetPassword location={useLocation()} />
+    );
+    const ProtectedPerfil = (props) => (
+      <ProtectedRoute component={() => <ChangePassword component={Perfil} {...props} />} />
     );
 
     return (
@@ -82,6 +86,22 @@ class App extends React.Component{
             </Routes>
             <PasswordChangeModal />
           </PasswordModalProvider>
+        <PasswordModalProvider>
+          <Routes>
+            <Route exact path="/" element={<FirstScreen />}></Route>
+            <Route exact path="/login" element={<Login />}></Route>
+            <Route exact path="/home" element={<ProtectedHome />}></Route>
+            <Route exact path="/alunos" element={<ProtectedAluno />}></Route>
+            <Route exact path="/orientadores" element={<ProtectedOrientador />}></Route>
+            <Route exact path="/tcc" element={<ProtectedTCC />}></Route>
+            <Route exact path="/meu-tcc" element={<ProtectedMeuTCC />}></Route>
+            <Route exact path="/categorias" element={<ProtectedCategoria />}></Route>
+            <Route exact path="/users" element={<ProtectedUsers />}></Route>
+            <Route exact path="/reset-password" element={<ParametrizedResetPasword />}></Route>
+            <Route exact path="/perfil" element={<ProtectedPerfil />}></Route>
+          </Routes>
+          <PasswordChangeModal />
+        </PasswordModalProvider>
         </div>
       </BrowserRouter>
     );

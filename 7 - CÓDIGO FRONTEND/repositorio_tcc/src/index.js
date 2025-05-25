@@ -4,7 +4,7 @@ import './index.css';
 import App from './App';
 
 //Endereço do servidor a ser utilizado nas requisições HTTP
-window.server = 'http://localhost:8080'
+window.server = process.env.REACT_APP_URL_API
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
