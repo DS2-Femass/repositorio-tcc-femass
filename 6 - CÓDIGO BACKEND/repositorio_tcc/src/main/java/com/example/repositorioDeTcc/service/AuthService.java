@@ -1,10 +1,13 @@
 package com.example.repositorioDeTcc.service;
 
 import com.example.repositorioDeTcc.dto.*;
+import com.example.repositorioDeTcc.exception.ExceptionResponse;
 import com.example.repositorioDeTcc.exception.MustChangePasswordException;
 import com.example.repositorioDeTcc.exception.TooManyArgumentsException;
-import com.example.repositorioDeTcc.model.Role;
-import com.example.repositorioDeTcc.model.User;
+import com.example.repositorioDeTcc.model.*;
+import com.example.repositorioDeTcc.repository.AlunoRepository;
+import com.example.repositorioDeTcc.repository.OrientadorRepository;
+import com.example.repositorioDeTcc.repository.ProfessorTCCRepository;
 import com.example.repositorioDeTcc.repository.UserRepository;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,9 +19,12 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.security.Principal;
+import java.util.Date;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -33,6 +39,10 @@ public class AuthService {
     private PasswordEncoder passwordEncoder;
     @Autowired
     MailService mailService;
+    @Autowired
+    AlunoRepository alunoRepository;
+    @Autowired
+    OrientadorRepository orientadorRepository;
 
     public ResponseEntity<?> login(LoginRequestDTO loginRequestDTO) {
 
@@ -141,6 +151,54 @@ public class AuthService {
         }else {
             throw new IllegalStateException("User not found");
         }
+    }
+
+    public ResponseEntity<?> firstAccess(PrimeiroAcessoRequestDTO request) {
+        String identificador = request.matriculaOuCpf();
+
+        Optional<Aluno> alunoOpt = alunoRepository.findByMatricula(identificador);
+        Optional<Orientador> orientadorOpt = orientadorRepository.findByCpf(identificador);
+
+        Optional<Pessoa> pessoaOpt = alunoOpt
+                .map(aluno -> (Pessoa) aluno)
+                .or(() -> orientadorOpt.map(orientador -> (Pessoa) orientador));
+
+        pessoaOpt.ifPresent(pessoa -> {
+            // Se já possui usuário, não faz nada
+            if (pessoa.getUser() != null) {
+                return;
+            }
+
+            String matricula = alunoOpt.map(Aluno::getMatricula).orElse(null);
+            String email = pessoa.getEmail();
+            String nomeCompleto = pessoa.getNomeCompleto();
+
+            String senhaAleatoria = UUID.randomUUID().toString();
+
+            User newUser = new User(nomeCompleto, matricula, email,
+                    new BCryptPasswordEncoder().encode(senhaAleatoria),
+                    Role.USER);
+            newUser.setMustChangePassword(true);
+
+            userRepository.save(newUser);
+
+            pessoa.setUser(newUser);
+
+            alunoOpt.ifPresentOrElse(
+                    aluno -> alunoRepository.save(aluno),
+                    () -> orientadorOpt.ifPresent(orientadorRepository::save)
+            );
+
+            String token = tokenService.generateSingleToken(newUser);
+
+            mailService.sendWelcomeEmail(
+                    new RegisterUserDTO(nomeCompleto, email, matricula, Role.USER, true),
+                    token
+            );
+        });
+
+        // Sempre retorna um OK genérico, sem indicar nada
+        return ResponseEntity.ok().build();
     }
 
 }

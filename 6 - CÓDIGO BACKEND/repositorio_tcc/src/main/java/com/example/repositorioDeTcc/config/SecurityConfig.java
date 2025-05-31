@@ -37,11 +37,14 @@ public class SecurityConfig {
                 .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(
-                        authorizeHttpRequests -> authorizeHttpRequests
+                        authorize -> authorize
                                 .requestMatchers(
-                                        "/auth/*"
-                                ).permitAll()
-                                .requestMatchers("/api/v1/auth/**",
+                                        "/auth/login",
+                                        "/auth/register",
+                                        "/auth/sendPasswordReset",
+                                        "/auth/reset-password/**",
+                                        "/auth/first-access",
+                                        "/api/v1/auth/**",
                                         "/v3/api-docs/**",
                                         "/swagger-ui.html/**",
                                         "/h2-console/**",
@@ -55,8 +58,9 @@ public class SecurityConfig {
                                         "/configuration/ui",
                                         "/swagger-ui.html",
                                         "/webjars/**",
-                                        "/swagger-ui").permitAll().anyRequest().authenticated()
-
+                                        "/swagger-ui"
+                                ).permitAll()
+                                .anyRequest().authenticated()
                 )
                 .cors(cors -> {})
                 .build();
