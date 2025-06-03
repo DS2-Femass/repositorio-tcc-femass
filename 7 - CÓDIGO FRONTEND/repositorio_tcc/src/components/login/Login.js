@@ -178,6 +178,12 @@ class Login extends Component {
     this.setState({ box: 'resetPasswordS1' });
   }
 
+  goToFirstAccess = () => {
+  this.cleanState();
+  this.setState({ box: 'firstAccess' });
+}
+
+
   goToLogin = () => {
     this.cleanState();
     this.setState({ box: 'login' });
@@ -289,6 +295,77 @@ class Login extends Component {
     }, 1000);
   }
 
+  handleFirstAccessSubmit = (event) => {
+      event.preventDefault();
+
+      const formElement = event.target;
+
+      if (!formElement.checkValidity()) {
+          formElement.reportValidity();
+          return;
+      }
+
+      if (!this.state.matriculaOuCpf || this.state.matriculaOuCpf.trim() === '') {
+          toast.warning('Por favor, preencha o campo Matrícula ou CPF', {
+              position: "top-right",
+              autoClose: 2000,
+              hideProgressBar: false,
+              closeOnClick: true,
+              pauseOnHover: true,
+              draggable: true,
+              progress: undefined,
+          });
+          return;
+      }
+
+      const firstAccessButton = document.getElementById('firstAccessButton');
+      firstAccessButton.disabled = true;
+      const previousText = firstAccessButton.innerText;
+      firstAccessButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>Aguarde...';
+
+      const url = window.server + "/auth/first-acess";
+
+      const data = {
+          "matriculaOuCpf": this.state.matriculaOuCpf.trim()
+      };
+
+      const requestOptions = {
+          method: 'POST',
+          headers: {
+              'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(data)
+      };
+
+      fetch(url, requestOptions)
+          .then((response) => {
+              if (response.status === 200) {
+                  setTimeout(() => {
+                      this.setState({ box: 'firstAccessSuccess' });
+                  }, 1000);
+                  return;
+              } else {
+                  toast.error('Ocorreu um erro', {
+                      position: "top-right",
+                      autoClose: 2000,
+                      hideProgressBar: false,
+                      closeOnClick: true,
+                      pauseOnHover: true,
+                      draggable: true,
+                      progress: undefined,
+                  });
+                  throw new Error('Falha na requisição: ' + response.status);
+              }
+          })
+          .catch(e => { console.error(e) });
+
+      setTimeout(() => {
+          firstAccessButton.disabled = false;
+          firstAccessButton.innerText = previousText;
+      }, 1000);
+  }
+
+
   handleKeyDown = (event) => {
     if (event.key === 'Enter') {
       event.preventDefault();
@@ -338,10 +415,8 @@ class Login extends Component {
           </div>
 
           <div className='mb-1 row'>
-            <div className='col-12 d-grid'>
-              <button className='btn btn-outline-secondary' onClick={this.goToFirstAccess}>Primeiro acesso</button>
-            </div>
-        </div>
+            <a href='#' className='text-decoration-none' onClick={this.goToFirstAccess}>Primeiro acesso</a>
+          </div>
           
           <div className='mb-1 row'>
             <a href='#' className='text-decoration-none' onClick={this.goToResetPassword}>Esqueci a senha</a>
@@ -386,8 +461,39 @@ class Login extends Component {
             </div>
           </div>
         </>;
-      }
-    }
+      } 
+    } else if (this.state.box === 'firstAccess') {
+      box = <>
+        <h2 className='fw-bold fs-4 text-decoration-underline mb-3' style={{ color: '#404040' }}>Primeiro Acesso</h2>
+        <form onSubmit={this.handleFirstAccessSubmit}>
+          <div className='row mb-3'>
+            <div className='col-12 mt-3'>
+              <p>Caso você seja aluno, entre com sua matrícula. Caso seja professor, entre com o CPF.</p>
+            </div>
+            <div className='col-12'>
+              <label htmlFor="firstAccessInput" className='required'>Matrícula ou CPF</label>
+              <input 
+                type="text" 
+                className="form-control" 
+                id="firstAccessInput" 
+                name="matriculaOuCpf"
+                placeholder="Digite sua matrícula ou CPF" 
+                value={this.state.matriculaOuCpf || ''} 
+                onChange={this.handleChange} 
+              />
+            </div>
+          </div>
+          <div className='row'>
+            <div className='col-12 d-flex justify-content-between'>
+              <button className='btn btn-secondary' onClick={this.goToLogin} type="button">Voltar</button>
+              <button className='btn btn-custom' id="firstAccessButton" type='submit'>Enviar</button>
+            </div>
+          </div>
+        </form>
+      </>
+
+
+}
 
     return (
       <div className='container-fluid d-flex flex-column justify-content-between' style={{ 'minHeight': '100vh' }}>
