@@ -336,9 +336,17 @@ class Login extends Component {
               <button className='btn btn-custom' id="loginButton" type='submit'>Entrar no sistema</button>
             </div>
           </div>
+
+          <div className='mb-1 row'>
+            <div className='col-12 d-grid'>
+              <button className='btn btn-outline-secondary' onClick={this.goToFirstAccess}>Primeiro acesso</button>
+            </div>
+        </div>
+          
           <div className='mb-1 row'>
             <a href='#' className='text-decoration-none' onClick={this.goToResetPassword}>Esqueci a senha</a>
           </div>
+
         </form>
       </>;
     } else if (this.state.box.startsWith('resetPassword')) {
