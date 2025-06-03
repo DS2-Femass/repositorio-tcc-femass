@@ -37,9 +37,14 @@ public class AuthController {
         return authService.sendMailReset(request);
     }
 
-    @PatchMapping("/reset-password={token}")
+    @PatchMapping("/reset-password/{token}")
     public ResponseEntity<?> resetPassword(@PathVariable String token, @Valid @RequestBody ResetPasswordDTO request){
         return authService.resetPassword(request, token);
+    }
+
+    @PostMapping("/first-access")
+    public ResponseEntity<?> firstAcess(@RequestBody PrimeiroAcessoRequestDTO request) {
+        return authService.firstAccess(request);
     }
 
 }
