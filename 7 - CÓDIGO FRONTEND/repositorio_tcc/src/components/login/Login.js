@@ -323,7 +323,7 @@ class Login extends Component {
       const previousText = firstAccessButton.innerText;
       firstAccessButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>Aguarde...';
 
-      const url = window.server + "/auth/first-acess";
+      const url = window.server + "/auth/first-access";
 
       const data = {
           "matriculaOuCpf": this.state.matriculaOuCpf.trim()
@@ -341,7 +341,7 @@ class Login extends Component {
           .then((response) => {
               if (response.status === 200) {
                   setTimeout(() => {
-                      this.setState({ box: 'firstAccessSuccess' });
+                      this.setState({ box: 'firstAccessSuccess' }); // ainda preciso implementar essa tela
                   }, 1000);
                   return;
               } else {
