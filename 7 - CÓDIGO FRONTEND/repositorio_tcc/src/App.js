@@ -17,6 +17,7 @@ import { useLocation } from 'react-router-dom';
 import Categoria from './components/categoria/Categoria.js';
 import MeuTCC from './components/tcc/MeuTCC.js';
 import Perfil from './components/perfil/Perfil.js';
+import FirstAccess from './components/firstAccess/FirstAccess.js';
 
 class App extends React.Component{
   
@@ -67,6 +68,7 @@ class App extends React.Component{
             <Route exact path="/users" element={<ProtectedUsers />}></Route>
             <Route exact path="/reset-password" element={<ParametrizedResetPasword />}></Route>
             <Route exact path="/perfil" element={<ProtectedPerfil />}></Route>
+            <Route exact path="/first-access" element={<FirstAccess />}></Route>
           </Routes>
           <PasswordChangeModal />
         </PasswordModalProvider>
