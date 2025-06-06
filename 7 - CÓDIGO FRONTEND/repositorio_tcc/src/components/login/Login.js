@@ -180,7 +180,7 @@ class Login extends Component {
 
   goToFirstAccess = () => {
   this.cleanState();
-  this.setState({ box: 'firstAccess' });
+  this.setState({ box: 'firstAccess1' });
 }
 
 
@@ -341,7 +341,7 @@ class Login extends Component {
           .then((response) => {
               if (response.status === 200) {
                   setTimeout(() => {
-                      this.setState({ box: 'firstAccessSuccess' }); // ainda preciso implementar essa tela
+                      this.setState({ box: 'firstAccess2' }); // ainda preciso implementar essa tela
                   }, 1000);
                   return;
               } else {
@@ -462,38 +462,52 @@ class Login extends Component {
           </div>
         </>;
       } 
-    } else if (this.state.box === 'firstAccess') {
-      box = <>
-        <h2 className='fw-bold fs-4 text-decoration-underline mb-3' style={{ color: '#404040' }}>Primeiro Acesso</h2>
-        <form onSubmit={this.handleFirstAccessSubmit}>
-          <div className='row mb-3'>
-            <div className='col-12 mt-3'>
-              <p>Caso você seja aluno, entre com sua matrícula. Caso seja professor, entre com o CPF.</p>
+    } else if (this.state.box.startsWith('firstAccess')) {
+        if (this.state.box === 'firstAccess1') {
+          box = <>
+          <h2 className='fw-bold fs-4 text-decoration-underline mb-3' style={{ color: '#404040' }}>Primeiro Acesso</h2>
+          <form onSubmit={this.handleFirstAccessSubmit}>
+            <div className='row mb-3'>
+              <div className='col-12 mt-3'>
+                <p>Caso você seja aluno, entre com sua matrícula. Caso seja professor, entre com o CPF.</p>
+              </div>
+              <div className='col-12'>
+                <label htmlFor="firstAccessInput" className='required'>Matrícula ou CPF</label>
+                <input 
+                  type="text" 
+                  className="form-control" 
+                  id="firstAccessInput" 
+                  name="matriculaOuCpf"
+                  placeholder="Digite sua matrícula ou CPF" 
+                  value={this.state.matriculaOuCpf || ''} 
+                  onChange={this.handleChange} 
+                />
+              </div>
             </div>
-            <div className='col-12'>
-              <label htmlFor="firstAccessInput" className='required'>Matrícula ou CPF</label>
-              <input 
-                type="text" 
-                className="form-control" 
-                id="firstAccessInput" 
-                name="matriculaOuCpf"
-                placeholder="Digite sua matrícula ou CPF" 
-                value={this.state.matriculaOuCpf || ''} 
-                onChange={this.handleChange} 
-              />
+            <div className='row'>
+              <div className='col-12 d-flex justify-content-between'>
+                <button className='btn btn-secondary' onClick={this.goToLogin} type="button">Voltar</button>
+                <button className='btn btn-custom' id="firstAccessButton" type='submit'>Enviar</button>
+              </div>
             </div>
-          </div>
-          <div className='row'>
-            <div className='col-12 d-flex justify-content-between'>
-              <button className='btn btn-secondary' onClick={this.goToLogin} type="button">Voltar</button>
-              <button className='btn btn-custom' id="firstAccessButton" type='submit'>Enviar</button>
+          </form>
+        </>
+      } else if (this.state.box === 'firstAccess2') {
+          box = <>
+            <h2 className='fw-bold fs-4 text-decoration-underline mb-3' style={{ color: '#404040' }}>Primeiro Acesso</h2>
+            <div className='row'>
+              <div className='col-12 mt-3'>
+                <p>Recebemos sua solicitação!<br /> Verifique seu e-mail para instruções de acesso.</p>
+              </div>
             </div>
-          </div>
-        </form>
-      </>
-
-
-}
+            <div className='row'>
+              <div className='col-12 d-flex justify-content-end'>
+                <button className='btn btn-custom' onClick={this.goToLogin}>Voltar</button>
+              </div>
+            </div>
+        </>;
+      }
+    }
 
     return (
       <div className='container-fluid d-flex flex-column justify-content-between' style={{ 'minHeight': '100vh' }}>
