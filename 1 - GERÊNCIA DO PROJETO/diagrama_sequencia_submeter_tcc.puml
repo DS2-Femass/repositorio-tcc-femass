@@ -1,0 +1,60 @@
+@startuml
+
+
+
+title Sequência: Submissão de TCC
+
+actor Usuário as User
+participant Frontend
+participant TCCController
+participant TCCService
+participant TCCRepository
+participant AlunoRepository
+participant OrientadorRepository
+participant CategoriaRepository
+participant SubcategoriaRepository
+
+User -> Frontend: Preenche e envia dados do TCC
+Frontend -> TCCController: POST /tcc (TCCDTO)
+activate TCCController
+
+TCCController -> TCCService: insert(tccDTO)
+activate TCCService
+
+' Validação e busca de entidades relacionadas
+TCCService -> AlunoRepository: findById(alunoId)
+activate AlunoRepository
+AlunoRepository --> TCCService: Aluno
+deactivate AlunoRepository
+
+TCCService -> OrientadorRepository: findById(orientadorId)
+activate OrientadorRepository
+OrientadorRepository --> TCCService: Orientador
+deactivate OrientadorRepository
+
+TCCService -> CategoriaRepository: findById(categoriaId)
+activate CategoriaRepository
+CategoriaRepository --> TCCService: Categoria
+deactivate CategoriaRepository
+
+TCCService -> SubcategoriaRepository: findById(subcategoriaId)
+activate SubcategoriaRepository
+SubcategoriaRepository --> TCCService: Subcategoria
+deactivate SubcategoriaRepository
+
+' Criação e persistência da entidade TCC
+TCCService -> TCCRepository: save(tccEntity)
+activate TCCRepository
+TCCRepository --> TCCService: tccEntity (com ID)
+deactivate TCCRepository
+
+TCCService --> TCCController: TCCDTO (criado)
+deactivate TCCService
+
+TCCController --> Frontend: 200 OK (TCCDTO)
+deactivate TCCController
+
+Frontend -> User: Exibe mensagem de sucesso
+
+@enduml
+
