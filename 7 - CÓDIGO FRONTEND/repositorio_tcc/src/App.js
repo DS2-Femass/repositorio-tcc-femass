@@ -17,6 +17,18 @@ import { useLocation } from 'react-router-dom';
 import Categoria from './components/categoria/Categoria.js';
 import MeuTCC from './components/tcc/MeuTCC.js';
 import Perfil from './components/perfil/Perfil.js';
+import Navbar from './components/navbar/Navbar';
+import SolicitarOrientador from './components/SolicitarOrientador/SolicitarOrientador';
+import Entregas from './components/entregas/entregas.js';
+import VisualizarSolicitacoes from './components/VisualizarSolicitacoes/VisualizarSolicitacoes.js';
+import Orientandos from './components/Orientandos/Orientandos.js';
+import Feedback from './components/Feedback/Feedback';
+import GerenciamentoEntregas from './components/GerenciamentoEntregas/GerenciamentoEntregas.js';
+
+
+
+
+
 
 class App extends React.Component{
   
@@ -55,12 +67,23 @@ class App extends React.Component{
       <BrowserRouter>
         <div className="container-fluid">
         <PasswordModalProvider>
+          <Navbar />
           <Routes>
             <Route exact path="/" element={<FirstScreen />}></Route>
             <Route exact path="/login" element={<Login />}></Route>
             <Route exact path="/home" element={<ProtectedHome />}></Route>
             <Route exact path="/alunos" element={<ProtectedAluno />}></Route>
             <Route exact path="/orientadores" element={<ProtectedOrientador />}></Route>
+
+           {/* Nova rota adicionada */}
+            <Route exact path="/solicitar-orientador" element={<SolicitarOrientador />} />
+            <Route exact path="/entregas" element={<Entregas />} />
+            <Route exact path='/visualizar-solicitacoes' element={<VisualizarSolicitacoes />} />   
+            <Route exact path="/orientandos" element={<Orientandos />} />     
+            <Route exact path="/feedback" element={<Feedback />} />
+            <Route exact path="/gerenciamento-entregas" element={<GerenciamentoEntregas />} />
+
+
             <Route exact path="/tcc" element={<ProtectedTCC />}></Route>
             <Route exact path="/meu-tcc" element={<ProtectedMeuTCC />}></Route>
             <Route exact path="/categorias" element={<ProtectedCategoria />}></Route>
