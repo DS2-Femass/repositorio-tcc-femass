@@ -76,7 +76,7 @@ class ResetPassword extends Component {
             return;
         }
 
-        let url = window.server + "/auth/reset-password=" + this.state.token;
+        let url = window.server + "/auth/reset-password/" + this.state.token;
 
         const data = {
             "newPassword": this.state.password,
