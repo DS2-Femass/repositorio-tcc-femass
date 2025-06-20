@@ -24,7 +24,7 @@ export default class Orientandos extends Component {
       <>
         <Navbar />
         <div className="container mt-5">
-          <h4 className="text-primary fw-bold">Orientandos</h4>
+          <h4 className="text-primary fw-bold">Alunos Orientados</h4>
           <table className="table table-bordered mt-3">
             <thead className="table-light">
               <tr>

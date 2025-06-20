@@ -43,6 +43,7 @@ export default class Navbar extends Component {
                       <Dropdown.Item as={Link} to="/orientadores">Orientadores</Dropdown.Item>
                       <Dropdown.Item as={Link} to="/alunos">Alunos</Dropdown.Item>
                      <Dropdown.Item as={Link} to="/gerenciamento-entregas">Gerenciamento de Entregas</Dropdown.Item>
+                      <Dropdown.Item as={Link} to="/cadastro-entregas">Cadastro de Entregas</Dropdown.Item>
                     </Dropdown.Menu>
                   </Dropdown>
                 </li>

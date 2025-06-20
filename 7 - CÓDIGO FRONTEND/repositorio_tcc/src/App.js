@@ -24,6 +24,7 @@ import VisualizarSolicitacoes from './components/VisualizarSolicitacoes/Visualiz
 import Orientandos from './components/Orientandos/Orientandos.js';
 import Feedback from './components/Feedback/Feedback';
 import GerenciamentoEntregas from './components/GerenciamentoEntregas/GerenciamentoEntregas.js';
+import CadastroEntregas from './components/CadastroEntregas/CadastroEntregas.js';
 
 
 
@@ -82,6 +83,7 @@ class App extends React.Component{
             <Route exact path="/orientandos" element={<Orientandos />} />     
             <Route exact path="/feedback" element={<Feedback />} />
             <Route exact path="/gerenciamento-entregas" element={<GerenciamentoEntregas />} />
+            <Route exact path="/cadastro-entregas" element={<CadastroEntregas />} />
 
 
             <Route exact path="/tcc" element={<ProtectedTCC />}></Route>
