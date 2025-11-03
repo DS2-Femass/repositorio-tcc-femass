@@ -1,0 +1,97 @@
+.border-rounded {
+    border-radius: 15px;
+    overflow: hidden;
+}
+
+.card {
+    transition: all 0.3s ease;
+}
+
+.modal-close-button {
+    filter: brightness(0) invert(1) !important;
+}
+
+.form-floating > .form-control:focus,
+.form-floating > .form-control:not(:placeholder-shown) {
+    padding-top: 1.625rem;
+    padding-bottom: 0.625rem;
+}
+
+.form-floating > .form-control:focus ~ label,
+.form-floating > .form-control:not(:placeholder-shown) ~ label {
+    opacity: .65;
+    transform: scale(.85) translateY(-0.5rem) translateX(0.15rem);
+}
+
+/* Animações */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.page-content {
+    animation: fadeIn 0.5s ease-out;
+}
+
+.btn-lg {
+    font-size: 1rem;
+}
+
+.styled-button {
+    border: none;
+    padding: 0.8rem 1.8rem;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    transition: all 0.3s ease;
+}
+
+.new-tcc-button {
+    background: linear-gradient(45deg, #0d6efd, #0088ff);
+    box-shadow: 0 4px 15px rgba(13, 110, 253, 0.2);
+}
+
+.new-tcc-button:hover {
+    background: linear-gradient(45deg, #0b5ed7, #0077ff);
+    box-shadow: 0 6px 20px rgba(13, 110, 253, 0.3);
+    transform: translateY(-2px);
+}
+
+.new-tcc-button i {
+    transition: transform 0.3s ease;
+}
+
+.new-tcc-button:hover i {
+    transform: rotate(90deg);
+}
+
+.categories-button {
+    background: linear-gradient(45deg, #fda90d, #ffa600);
+    box-shadow: 0 4px 15px rgba(253, 189, 13, 0.2);
+}
+
+.clear-filters-btn {
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+    border-radius: 6px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    transition: all 0.3s ease;
+    border: 1px solid #6c757d;
+    color: #6c757d;
+}
+
+.clear-filters-btn:hover {
+    background-color: #6c757d;
+    color: white;
+    box-shadow: 0 4px 12px rgba(108, 117, 125, 0.2);
+}
+
+.clear-filters-btn i {
+    font-size: 1.1rem;
+    transition: transform 0.3s ease;
+}
+
+.clear-filters-btn:hover i {
+    transform: rotate(-15deg);
+}
