@@ -54,7 +54,8 @@ class TCC extends Component {
         filterTitulo: '',
         filterAluno: '',
         filterOrientador: '',
-        filterPalavraChave: ''
+        filterPalavraChave: '',
+        filterCurso: ''
     }
 
     tccService = new TCCService();
@@ -129,10 +130,15 @@ class TCC extends Component {
                 const matchesTitulo = prevState.filterTitulo === '' || tcc.titulo.toLowerCase().includes(prevState.filterTitulo.toLowerCase());
                 const matchesAluno = prevState.filterAluno === '' || tcc.nomeCompletoAluno.toLowerCase().includes(prevState.filterAluno.toLowerCase());
                 const matchesOrientador = prevState.filterOrientador === '' || tcc.nomeCompletoOrientador.toLowerCase().includes(prevState.filterOrientador.toLowerCase());
+
                 const matchesPalavraChave = prevState.filterPalavraChave === '' ||
                     (tcc.palavrasChave && tcc.palavrasChave.some(p => p.nome.toLowerCase().includes(prevState.filterPalavraChave.toLowerCase())));
 
-                return matchesTitulo && matchesAluno && matchesOrientador && matchesPalavraChave;
+                const matchesCurso =
+                    prevState.filterCurso === '' ||
+                    tcc.nomeCurso?.toLowerCase().includes(prevState.filterCurso.toLowerCase());
+
+                return matchesTitulo && matchesAluno && matchesOrientador && matchesPalavraChave&& matchesCurso;
             })
         }));
     }
@@ -142,7 +148,7 @@ class TCC extends Component {
     };
 
     clearFilters = () => {
-        this.setState({ filterTitulo: '', filterAluno: '', filterOrientador: '', filterPalavraChave: '' }, this.applyFilters);
+        this.setState({ filterTitulo: '', filterAluno: '', filterOrientador: '', filterPalavraChave: '', filterCurso: ''}, this.applyFilters);
     }
 
     handleChange = (event) => {
@@ -628,11 +634,27 @@ class TCC extends Component {
                                                 <label htmlFor="filterPalavraChave">Palavra-Chave</label>
                                             </div>
                                         </div>
+
+                                        <div className="col-md-4">
+                                            <div className="form-floating">
+                                                <input
+                                                    id="filterCurso"
+                                                    name="filterCurso"
+                                                    type="text"
+                                                    className="form-control"
+                                                    placeholder="Buscar curso..."
+                                                    value={this.state.filterCurso}
+                                                    onChange={this.handleFilterChange}
+                                                />
+                                                <label htmlFor="filterCurso">Curso</label>
+                                            </div>
+                                        </div>
                                     </div>
+
                                 </div>
                             </motion.div>
                         </div>
-                    </div>
+                    </div >
 
                     <div className="row">
                         <div className="col-12">
@@ -659,7 +681,7 @@ class TCC extends Component {
                             </div>
                         </div>
                     </div>
-                </motion.div>
+                </motion.div >
 
                 <div id='modals'>
                     <AnimatePresence>
@@ -997,7 +1019,7 @@ class TCC extends Component {
                         )}
                     </AnimatePresence>
                 </div>
-            </div>
+            </div >
         )
     }
 }
