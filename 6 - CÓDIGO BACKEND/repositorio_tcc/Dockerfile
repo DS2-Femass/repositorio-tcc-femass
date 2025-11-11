@@ -9,7 +9,7 @@ COPY src ./src
 
 RUN mvn package -DskipTests
 
-FROM openjdk:21-jdk-slim
+FROM amazoncorretto:21
 
 EXPOSE 8080
 WORKDIR /app

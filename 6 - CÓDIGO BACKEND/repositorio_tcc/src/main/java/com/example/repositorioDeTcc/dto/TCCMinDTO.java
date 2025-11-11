@@ -8,6 +8,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.beans.BeanUtils;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @NoArgsConstructor
@@ -22,8 +24,10 @@ public class TCCMinDTO {
     private String nomeCompletoOrientador;
     private UUID idCurso;
     private UUID idSubcategoria;
+    private List<PalavraChaveDTO> palavrasChave = new ArrayList<>();
+    private String nomeCurso;
 
-    public TCCMinDTO(TCC entity){
+    public TCCMinDTO(TCC entity) {
         this.id = entity.getId();
         this.titulo = entity.getTitulo();
         this.idAluno = entity.getAluno().getId();
@@ -31,8 +35,19 @@ public class TCCMinDTO {
         this.idOrientador = entity.getOrientador().getId();
         this.nomeCompletoOrientador = entity.getOrientador().getNomeCompleto();
         this.idCurso = entity.getCurso().getId();
+
+        if (entity.getCurso() != null) {
+            this.idCurso = entity.getCurso().getId();
+            this.nomeCurso = entity.getCurso().getNome();
+        }
         // Verifica se a subcategoria é nula antes de acessar seus atributos
-        if(entity.getSubcategoria() != null)
+        if (entity.getSubcategoria() != null)
             this.idSubcategoria = entity.getSubcategoria().getId();
+
+        // Adiciona palavras-chave
+        if (entity.getPalavrasChave() != null && !entity.getPalavrasChave().isEmpty()) {
+            this.palavrasChave = new ArrayList<>();
+            entity.getPalavrasChave().forEach(p -> this.palavrasChave.add(new PalavraChaveDTO(p)));
+        }
     }
 }

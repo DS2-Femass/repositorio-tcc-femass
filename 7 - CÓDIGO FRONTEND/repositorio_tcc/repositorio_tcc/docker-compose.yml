@@ -1,0 +1,11 @@
+services:
+  frontend:
+    build: . # Busca pelo Dockerfile
+    container_name: frontend
+    volumes:
+      - .:/app
+      - /app/node_modules
+    ports:
+      - "3000:3000"
+    environment:
+      - REACT_APP_URL_API=http://localhost:8080
