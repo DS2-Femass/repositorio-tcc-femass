@@ -1,0 +1,5 @@
+CREATE TABLE IF NOT EXISTS palavra_chave(
+    id UUID PRIMARY KEY,
+    nome VARCHAR(30) NOT NULL UNIQUE,
+    ativo BOOLEAN DEFAULT TRUE
+);

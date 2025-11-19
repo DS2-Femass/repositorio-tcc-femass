@@ -1,0 +1,5 @@
+CREATE TABLE IF NOT EXISTS orientador(
+    id UUID PRIMARY KEY,
+    cpf VARCHAR(11) NOT NULL UNIQUE,
+    CONSTRAINT fk_id_orientador FOREIGN KEY (id) REFERENCES pessoa(id)
+);

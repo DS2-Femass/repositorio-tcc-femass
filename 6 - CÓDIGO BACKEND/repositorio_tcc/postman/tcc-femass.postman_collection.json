@@ -1,0 +1,1171 @@
+{
+	"info": {
+		"_postman_id": "e07ba4cd-e52f-4a8d-9731-f01e959d85af",
+		"name": "tcc-femass",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "28363821"
+	},
+	"item": [
+		{
+			"name": "alunos",
+			"item": [
+				{
+					"name": "Insert",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJTaXN0ZW1hVGNjIiwic3ViIjoiZXZlcnNvbi5taW1hcnRpbmV6QGdtYWlsLmNvbSIsImV4cCI6MTczMDM0MzIwNSwibXVzdENoYW5nZSI6ZmFsc2V9.aerZjOML2WBBec2R-JXrw4KnPhXGTOcc7VSczVuTuUs",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"nomeCompleto\": \"Everson Miranda Martinez\",\r\n    \"email\": \"everson@email.com\",\r\n    \"telefone\": \"22999999999\",\r\n    \"matricula\": \"2000000000\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/alunos",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"alunos"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJTaXN0ZW1hVGNjIiwic3ViIjoiZXZlcnNvbkBlbWFpbC5jb20iLCJleHAiOjE3Mjc1MDI3NzJ9.PQ_mUCsKnVP0OSINVulxT9UAtBXs3hegy6wHmagYpQ4",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"nomeCompleto\": \"Everson Miranda\",\r\n    \"email\": \"everson@gmail.com\",\r\n    \"telefone\": \"22888888888\",\r\n    \"matricula\": \"2000000000\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/alunos/9065ed71-a651-4c5e-9dbb-e10eaff4a666",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"alunos",
+								"9065ed71-a651-4c5e-9dbb-e10eaff4a666"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Find By ID",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJTaXN0ZW1hVGNjIiwic3ViIjoiZXZlcnNvbkBlbWFpbC5jb20iLCJleHAiOjE3Mjc1MDE0NTR9.lk561rQoS4DeGZOZBZJWJtbJklWtnaskv5OpjDJqTAI",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/alunos/9065ed71-a651-4c5e-9dbb-e10eaff4a666",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"alunos",
+								"9065ed71-a651-4c5e-9dbb-e10eaff4a666"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Find All",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJTaXN0ZW1hVGNjIiwic3ViIjoiYWRtaW5AYWRtaW4uY29tIiwiZXhwIjoxNzMxMTk0NjA5LCJtdXN0Q2hhbmdlIjpmYWxzZSwib3RwIjpmYWxzZX0.Jkh4R56gDwbRD-8p3uUjA8OclRpymMrK5NJSJO05HIc",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJTaXN0ZW1hVGNjIiwic3ViIjoiZXZlcnNvbkBlbWFpbC5jb20iLCJleHAiOjE3MjgxMDY0MDZ9.72xLC5QMM1s2g_CO7emq13i78PaHtoL7UvG4-PmF2R8",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/alunos",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"alunos"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/alunos/9065ed71-a651-4c5e-9dbb-e10eaff4a666",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"alunos",
+								"9065ed71-a651-4c5e-9dbb-e10eaff4a666"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "orientadores",
+			"item": [
+				{
+					"name": "Insert",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJTaXN0ZW1hVGNjIiwic3ViIjoidGVzdGVAdGVzdGUuY29tIiwiZXhwIjoxNzI4NTM5ODI4fQ.HQXMSQIVMS7GrrZ5gyyM46QDuVHYrEfS0UlQ3DjJcKE",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"nomeCompleto\": \"Afonso Tavares\",\r\n    \"email\": \"afonso@email.com\",\r\n    \"telefone\": \"22999999999\",\r\n    \"cpf\": \"34145678912\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/orientadores",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"orientadores"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJTaXN0ZW1hVGNjIiwic3ViIjoiZXZlcnNvbkBlbWFpbC5jb20iLCJleHAiOjE3Mjc1MDI3NzJ9.PQ_mUCsKnVP0OSINVulxT9UAtBXs3hegy6wHmagYpQ4",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"nomeCompleto\": \"Afonso Tavares\",\r\n    \"email\": \"afonso@email.com\",\r\n    \"telefone\": \"22999999999\",\r\n    \"cpf\": \"34145673920\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/orientadores/9065ed71-a651-4c5e-9dbb-e10eaff4a666",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"orientadores",
+								"9065ed71-a651-4c5e-9dbb-e10eaff4a666"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJTaXN0ZW1hVGNjIiwic3ViIjoiZXZlcnNvbkBlbWFpbC5jb20iLCJleHAiOjE3Mjc1MDI3NzJ9.PQ_mUCsKnVP0OSINVulxT9UAtBXs3hegy6wHmagYpQ4",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/orientadores/9065ed71-a651-4c5e-9dbb-e10eaff4a666",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"orientadores",
+								"9065ed71-a651-4c5e-9dbb-e10eaff4a666"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Find By ID",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJTaXN0ZW1hVGNjIiwic3ViIjoiZXZlcnNvbkBlbWFpbC5jb20iLCJleHAiOjE3Mjc1MDE0NTR9.lk561rQoS4DeGZOZBZJWJtbJklWtnaskv5OpjDJqTAI",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/orientadores/550e8400-e29b-41d4-a716-446655440000",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"orientadores",
+								"550e8400-e29b-41d4-a716-446655440000"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Find All",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJTaXN0ZW1hVGNjIiwic3ViIjoiZXZlcnNvbi5taW1hcnRpbmV6QGdtYWlsLmNvbSIsImV4cCI6MTcyOTk5MTY1MSwibXVzdENoYW5nZSI6dHJ1ZX0.XZcEL7_n-dSvmr1ZnCjVeMTu_LOtV4azVdYNPZM1niA",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJTaXN0ZW1hVGNjIiwic3ViIjoiZXZlcnNvbkBlbWFpbC5jb20iLCJleHAiOjE3Mjc1MDE0NTR9.lk561rQoS4DeGZOZBZJWJtbJklWtnaskv5OpjDJqTAI",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/orientadores",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"orientadores"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "categorias",
+			"item": [
+				{
+					"name": "Insert",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJTaXN0ZW1hVGNjIiwic3ViIjoiZXZlcnNvbi5taW1hcnRpbmV6QGdtYWlsLmNvbSIsImV4cCI6MTczMTIwNTcxMSwibXVzdENoYW5nZSI6ZmFsc2V9.qND_5rw6oo-4RWzpS1XO7YeMJTDelMJ2LV3u4pFC-4o",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"nomeCategoria\": \"Inteligência Artificial\",\r\n    \"descricaoCategoria\": \"Categoria de TI sobre como fazer as máquinas imitarem a inteligência humana\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/categorias",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"categorias"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJTaXN0ZW1hVGNjIiwic3ViIjoiZXZlcnNvbi5taW1hcnRpbmV6QGdtYWlsLmNvbSIsImV4cCI6MTczMTIwNTcxMSwibXVzdENoYW5nZSI6ZmFsc2V9.qND_5rw6oo-4RWzpS1XO7YeMJTDelMJ2LV3u4pFC-4o",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/categorias/65b96128-43a2-4b73-84ad-9390503ec0fc",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"categorias",
+								"65b96128-43a2-4b73-84ad-9390503ec0fc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Find By ID",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJTaXN0ZW1hVGNjIiwic3ViIjoiZXZlcnNvbi5taW1hcnRpbmV6QGdtYWlsLmNvbSIsImV4cCI6MTczMTIwNTcxMSwibXVzdENoYW5nZSI6ZmFsc2V9.qND_5rw6oo-4RWzpS1XO7YeMJTDelMJ2LV3u4pFC-4o",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/categorias/65b96128-43a2-4b73-84ad-9390503ec0fc",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"categorias",
+								"65b96128-43a2-4b73-84ad-9390503ec0fc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Find All",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJTaXN0ZW1hVGNjIiwic3ViIjoiZXZlcnNvbi5taW1hcnRpbmV6QGdtYWlsLmNvbSIsImV4cCI6MTczMTIwNTcxMSwibXVzdENoYW5nZSI6ZmFsc2V9.qND_5rw6oo-4RWzpS1XO7YeMJTDelMJ2LV3u4pFC-4o",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJTaXN0ZW1hVGNjIiwic3ViIjoiZXZlcnNvbkBlbWFpbC5jb20iLCJleHAiOjE3Mjc1MDE0NTR9.lk561rQoS4DeGZOZBZJWJtbJklWtnaskv5OpjDJqTAI",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/categorias",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"categorias"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJTaXN0ZW1hVGNjIiwic3ViIjoiZXZlcnNvbi5taW1hcnRpbmV6QGdtYWlsLmNvbSIsImV4cCI6MTczMTIwNTcxMSwibXVzdENoYW5nZSI6ZmFsc2V9.qND_5rw6oo-4RWzpS1XO7YeMJTDelMJ2LV3u4pFC-4o",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"nomeCategoria\": \"Banco de Dados\",\r\n    \"descricaoCategoria\": \"Coleção de dados estruturados, armazenados eletronicamente, que pode conter qualquer tipo de informação.\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/categorias/65b96128-43a2-4b73-84ad-9390503ec0fc",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"categorias",
+								"65b96128-43a2-4b73-84ad-9390503ec0fc"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "subcategorias",
+			"item": [
+				{
+					"name": "Insert",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJTaXN0ZW1hVGNjIiwic3ViIjoiZXZlcnNvbi5taW1hcnRpbmV6QGdtYWlsLmNvbSIsImV4cCI6MTczMTIwNTcxMSwibXVzdENoYW5nZSI6ZmFsc2V9.qND_5rw6oo-4RWzpS1XO7YeMJTDelMJ2LV3u4pFC-4o",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"nomeSubcategoria\": \"Aprendizado Profundo\",\r\n    \"descricaoSubcategoria\": \"Método de inteligência artificial (IA) que permite que computadores aprendam a processar dados de forma inspirada no cérebro humano.\",\r\n    \"idCategoria\": \"ef1a25f0-25fb-4761-b93b-4c8b69d7d163\"",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/subcategorias",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"subcategorias"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJTaXN0ZW1hVGNjIiwic3ViIjoiZXZlcnNvbi5taW1hcnRpbmV6QGdtYWlsLmNvbSIsImV4cCI6MTczMTIwNTcxMSwibXVzdENoYW5nZSI6ZmFsc2V9.qND_5rw6oo-4RWzpS1XO7YeMJTDelMJ2LV3u4pFC-4o",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"nomeSubcategoria\": \"Banco de Dados\",\r\n    \"descricaoSubcategoria\": \"\",\r\n    \"idCategoria\": \"ef1a25f0-25fb-4761-b93b-4c8b69d7d163\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/subcategorias/975b3586-7c71-4622-b819-cf7f936c50f4",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"subcategorias",
+								"975b3586-7c71-4622-b819-cf7f936c50f4"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJTaXN0ZW1hVGNjIiwic3ViIjoiZXZlcnNvbi5taW1hcnRpbmV6QGdtYWlsLmNvbSIsImV4cCI6MTczMTIwNTcxMSwibXVzdENoYW5nZSI6ZmFsc2V9.qND_5rw6oo-4RWzpS1XO7YeMJTDelMJ2LV3u4pFC-4o",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/subcategorias/975b3586-7c71-4622-b819-cf7f936c50f4",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"subcategorias",
+								"975b3586-7c71-4622-b819-cf7f936c50f4"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Find All",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJTaXN0ZW1hVGNjIiwic3ViIjoiZXZlcnNvbi5taW1hcnRpbmV6QGdtYWlsLmNvbSIsImV4cCI6MTczMTIwNTcxMSwibXVzdENoYW5nZSI6ZmFsc2V9.qND_5rw6oo-4RWzpS1XO7YeMJTDelMJ2LV3u4pFC-4o",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJTaXN0ZW1hVGNjIiwic3ViIjoiZXZlcnNvbkBlbWFpbC5jb20iLCJleHAiOjE3Mjc1MDE0NTR9.lk561rQoS4DeGZOZBZJWJtbJklWtnaskv5OpjDJqTAI",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/subcategorias",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"subcategorias"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Find By ID",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJTaXN0ZW1hVGNjIiwic3ViIjoiZXZlcnNvbi5taW1hcnRpbmV6QGdtYWlsLmNvbSIsImV4cCI6MTczMTIwNTcxMSwibXVzdENoYW5nZSI6ZmFsc2V9.qND_5rw6oo-4RWzpS1XO7YeMJTDelMJ2LV3u4pFC-4o",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/subcategorias/975b3586-7c71-4622-b819-cf7f936c50f4",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"subcategorias",
+								"975b3586-7c71-4622-b819-cf7f936c50f4"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "users",
+			"item": [
+				{
+					"name": "Register",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"nomeCompleto\": \"Everson Martinez\",\n    \"email\": \"everson@email.com\",\n    \"matricula\": \"2000000000\",\n    \"password\": \"1234\",\n    \"mustChangePassword\": true\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/auth/register",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"auth",
+								"register"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login Must Change Password",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"matricula\": \"2000000000\",\r\n    \"password\": \"1234\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/auth/login",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Change Password",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJTaXN0ZW1hVGNjIiwic3ViIjoiZXZlcnNvbi5taW1hcnRpbmV6QGdtYWlsLmNvbSIsImV4cCI6MTczMDE2MzIyMSwibXVzdENoYW5nZSI6dHJ1ZX0.tsNoqaLVavjz98TQW5t7VXcMm3qff9-VRoy-dvcfPN8",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"currentPassword\": \"1234\",\r\n    \"newPassword\": \"12345\",\r\n    \"confirmPassword\": \"12345\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/auth/changePassword",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"auth",
+								"changePassword"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Reset Password Step 1",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\": \"everson@email.com\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/auth/sendPasswordReset",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"auth",
+								"sendPasswordReset"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Reset Password Step 2",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"newPassword\": \"1234\",\r\n    \"confirmPassword\": \"1234\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/auth/reset-password=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJTaXN0ZW1hVGNjIiwic3ViIjoiZXZlcnNvbi5taW1hcnRpbmV6QGdtYWlsLmNvbSIsImV4cCI6MTcyOTU2MTk2OCwibXVzdENoYW5nZSI6ZmFsc2UsIk9UUCI6dHJ1ZX0.pn8aWJXmSDkontBvvGZVbHdgsts3GxKYsrTMoRqWyFg?toemail=everson.mimartinez@gmail.com",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"auth",
+								"reset-password=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJTaXN0ZW1hVGNjIiwic3ViIjoiZXZlcnNvbi5taW1hcnRpbmV6QGdtYWlsLmNvbSIsImV4cCI6MTcyOTU2MTk2OCwibXVzdENoYW5nZSI6ZmFsc2UsIk9UUCI6dHJ1ZX0.pn8aWJXmSDkontBvvGZVbHdgsts3GxKYsrTMoRqWyFg"
+							],
+							"query": [
+								{
+									"key": "toemail",
+									"value": "everson.mimartinez@gmail.com"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "tcc",
+			"item": [
+				{
+					"name": "Update",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJTaXN0ZW1hVGNjIiwic3ViIjoiZXZlcnNvbi5taW1hcnRpbmV6QGdtYWlsLmNvbSIsImV4cCI6MTczMTIwNTcxMSwibXVzdENoYW5nZSI6ZmFsc2V9.qND_5rw6oo-4RWzpS1XO7YeMJTDelMJ2LV3u4pFC-4o",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"titulo\":\"Teste de título2\",\r\n    \"idAluno\":\"17632d28-228f-478a-a59f-dd8d0b91e72f\",\r\n    \"idOrientador\":\"fdeb3d87-6350-4ed4-9ca6-a18a6b6247b2\",\r\n    \"idCurso\": 1,\r\n    \"resumo\" : \"O consumo colaborativo — também chamado de economia colaborativa ou economia compartilhada — é um modelo socioeconômico construído por meio do compartilhamento de recursos humanos, físicos e intelectuais, cujos produtos e/ou serviços são partilhados por diferentes indivíduos e organizações. O objetivo central do trabalho é abordar e analisar sobre o tema do consumo colaborativo na sociedade atual, bem como o impacto desse novo modelo nos indivíduos, nas organizações e no meio ambiente.\"  \r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/categorias/65b96128-43a2-4b73-84ad-9390503ec0fc",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"categorias",
+								"65b96128-43a2-4b73-84ad-9390503ec0fc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Insert TCC",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJTaXN0ZW1hVGNjIiwic3ViIjoiYWRtaW5AYWRtaW4uY29tIiwiZXhwIjoxNzMxMTk0NjA5LCJtdXN0Q2hhbmdlIjpmYWxzZSwib3RwIjpmYWxzZX0.Jkh4R56gDwbRD-8p3uUjA8OclRpymMrK5NJSJO05HIc",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"titulo\":\"Teste de título\",\r\n    \"idAluno\":\"17632d28-228f-478a-a59f-dd8d0b91e72f\",\r\n    \"idOrientador\":\"fdeb3d87-6350-4ed4-9ca6-a18a6b6247b2\",\r\n    \"idCurso\": 1,\r\n    \"resumo\" : \"\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/tcc",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"tcc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Find All",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJTaXN0ZW1hVGNjIiwic3ViIjoiYWRtaW5AYWRtaW4uY29tIiwiZXhwIjoxNzMxMjAwNTg5LCJtdXN0Q2hhbmdlIjpmYWxzZSwib3RwIjpmYWxzZX0.e1DJptFygVcngUBc70zf2B-gsJZ5ZmRLHlSOdsWNbr0",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJTaXN0ZW1hVGNjIiwic3ViIjoiZXZlcnNvbkBlbWFpbC5jb20iLCJleHAiOjE3Mjc1MDE0NTR9.lk561rQoS4DeGZOZBZJWJtbJklWtnaskv5OpjDJqTAI",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/tcc",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"tcc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJTaXN0ZW1hVGNjIiwic3ViIjoiZXZlcnNvbi5taW1hcnRpbmV6QGdtYWlsLmNvbSIsImV4cCI6MTcyOTk5MTY1MSwibXVzdENoYW5nZSI6dHJ1ZX0.XZcEL7_n-dSvmr1ZnCjVeMTu_LOtV4azVdYNPZM1niA",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/tcc/ea9f9ce8-5fab-45d7-bf9c-cad9901aeb5b",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"tcc",
+								"ea9f9ce8-5fab-45d7-bf9c-cad9901aeb5b"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Find By ID",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJTaXN0ZW1hVGNjIiwic3ViIjoiYWRtaW5AYWRtaW4uY29tIiwiZXhwIjoxNzMxMjAyOTA0LCJtdXN0Q2hhbmdlIjpmYWxzZSwib3RwIjpmYWxzZX0.4EZID4VIJGcVnNedLkNDhxDXZy6s1PS6Xgdq0ILLi1M",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/tcc/db0d8ca9-6d67-48d0-8d08-be7fb7685643",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"tcc",
+								"db0d8ca9-6d67-48d0-8d08-be7fb7685643"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Login",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"matricula\": \"000000\",\n    \"password\": \"admin\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/auth/login",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"auth",
+						"login"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

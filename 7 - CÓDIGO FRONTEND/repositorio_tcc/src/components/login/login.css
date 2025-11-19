@@ -1,0 +1,19 @@
+.btn-custom{
+    background-color: #2C3D8F;
+    color: white;
+}
+
+.btn-custom:hover,
+.btn-custom:focus,
+.btn-custom:active {
+    background-color: #46549b !important;
+    color: white !important;
+    border-color: #46549b !important; 
+}
+
+.btn-custom:active {
+    background-color: #46549b !important;
+    color: white !important;
+    border-color: #46549b !important;
+    box-shadow: none !important;
+}

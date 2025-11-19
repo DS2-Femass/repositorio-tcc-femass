@@ -1,0 +1,65 @@
+@startuml
+
+
+
+title Sequência: Login de Usuário
+
+actor Usuário as User
+participant Frontend
+participant AuthController
+participant AuthService
+participant AuthenticationManager as AuthManager
+participant UserRepository
+participant TokenService
+
+User -> Frontend: Insere email/matrícula e senha
+Frontend -> AuthController: POST /auth/login (LoginRequestDTO)
+activate AuthController
+
+AuthController -> AuthService: login(loginRequestDTO)
+activate AuthService
+
+' Verifica se email ou matrícula foi fornecido
+' (Omitido para clareza, mas validação ocorre)
+
+alt Email fornecido
+    AuthService -> AuthManager: authenticate(UsernamePasswordAuthenticationToken(email, password))
+    activate AuthManager
+    AuthManager --> AuthService: Authentication object (success or exception)
+    deactivate AuthManager
+    AuthService -> UserRepository: findByEmail(email)
+    activate UserRepository
+    UserRepository --> AuthService: User object
+    deactivate UserRepository
+else Matrícula fornecida
+    AuthService -> AuthManager: authenticate(UsernamePasswordAuthenticationToken(matricula, password))
+    activate AuthManager
+    AuthManager --> AuthService: Authentication object (success or exception)
+    deactivate AuthManager
+    AuthService -> UserRepository: findByMatricula(matricula)
+    activate UserRepository
+    UserRepository --> AuthService: User object
+    deactivate UserRepository
+end
+
+AuthService -> TokenService: generateToken(user)
+activate TokenService
+TokenService --> AuthService: JWT Token
+deactivate TokenService
+
+' Verifica se precisa mudar senha (mustChangePassword)
+alt Precisa mudar senha
+    AuthService --> AuthController: ResponseEntity (LoginResponseMustChangeDTO(token, true))
+else Não precisa mudar senha
+    AuthService --> AuthController: ResponseEntity (LoginResponseDTO(token))
+end
+
+deactivate AuthService
+
+AuthController --> Frontend: 200 OK (LoginResponseDTO ou LoginResponseMustChangeDTO)
+deactivate AuthController
+
+Frontend -> User: Redireciona para área logada ou solicita mudança de senha
+
+@enduml
+

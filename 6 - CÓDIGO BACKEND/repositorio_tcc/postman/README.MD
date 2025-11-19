@@ -1,0 +1,1 @@
+Arquivo para ser importado no software [Postman](https://www.postman.com/) para testagem dos endpoints da API. Possui a maioria dos endpoints adicionados, por isso também é uma boa para se familiarizar com o backend.

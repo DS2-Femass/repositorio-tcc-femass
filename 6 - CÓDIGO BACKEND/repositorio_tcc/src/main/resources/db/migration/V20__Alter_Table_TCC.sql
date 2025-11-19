@@ -1,0 +1,2 @@
+ALTER TABLE TCC 
+ADD COLUMN periodo DATE DEFAULT current_date NOT NULL;

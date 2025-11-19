@@ -1,0 +1,37 @@
+security:
+  jwt:
+    token:
+      secret-key: ${JWT_SECRET:53cr37}
+
+spring:
+  server:
+    address: 0.0.0.0
+    port: 8080
+
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${EMAIL_SECRET}
+    password: ${PASSWORD_SECRET}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+          debug: true
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    open-in-view: false
+
+frontend:
+  url: ${FRONTEND_URL:http://localhost:3000}

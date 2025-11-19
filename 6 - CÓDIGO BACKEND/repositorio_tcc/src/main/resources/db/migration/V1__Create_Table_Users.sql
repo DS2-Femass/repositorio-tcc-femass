@@ -1,0 +1,9 @@
+﻿CREATE TABLE IF NOT EXISTS users (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  matricula VARCHAR(11) NOT NULL,
+  email VARCHAR(255) NOT NULL UNIQUE,
+  nome_completo VARCHAR(255) NOT NULL,
+  password VARCHAR(255),
+  enabled BOOLEAN DEFAULT FALSE,
+  role VARCHAR(50) CHECK (role IN ('ADMIN', 'MODERATOR', 'USER'))
+);
