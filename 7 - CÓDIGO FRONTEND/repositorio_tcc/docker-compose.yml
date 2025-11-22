@@ -7,3 +7,5 @@ services:
       - /app/node_modules
     ports:
       - "3000:3000"
+    environment:
+      - REACT_APP_URL_API=http://localhost:8080

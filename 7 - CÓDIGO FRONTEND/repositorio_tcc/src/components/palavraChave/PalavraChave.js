@@ -4,48 +4,45 @@ import Navbar from '../navbar/Navbar';
 import { Button, Modal } from 'react-bootstrap';
 import { ToastContainer, toast } from 'react-toastify';
 import { motion, AnimatePresence } from 'framer-motion';
-import { CategoriaService } from '../../service/CategoriaService';
+import { PalavraChaveService } from '../../service/PalavraChaveService';
 
 function withNavigate(Component) {
     return (props) => {
       const navigate = useNavigate();
       return <Component {...props} navigate={navigate} />;
     };
-  }
+}
 
-class Categoria extends Component {
+class PalavraChave extends Component {
   
     state = {
-        categorias: [],
+        palavrasChave: [],
         filteredItems: [],
         filterNome: '',
-        filterDescricao: '',
+        filterAtivo: 'all',
         toDeleteItem: null,
         showModalDeletion: false,
         showModalEdit: false,
         showModalCreate: false,
-        showModalView: false,
         toEditItem: null,
-        toViewItem: null,
-        nomeCategoria: '',
-        descricaoCategoria: '',
+        nome: '',
+        ativo: true,
     }
 
-    categoriaService = new CategoriaService();
+    palavraChaveService = new PalavraChaveService();
 
     applyFilters = () => {
-        let filtered = [...this.state.categorias];
+        let filtered = [...this.state.palavrasChave];
         
         if (this.state.filterNome) {
             filtered = filtered.filter(item => 
-                item.nomeCategoria.toLowerCase().includes(this.state.filterNome.toLowerCase())
+                item.nome.toLowerCase().includes(this.state.filterNome.toLowerCase())
             );
         }
 
-        if (this.state.filterDescricao) {
-            filtered = filtered.filter(item => 
-                item.descricaoCategoria.toLowerCase().includes(this.state.filterDescricao.toLowerCase())
-            );
+        if (this.state.filterAtivo !== 'all') {
+            const ativoFilter = this.state.filterAtivo === 'true';
+            filtered = filtered.filter(item => item.ativo === ativoFilter);
         }
 
         this.setState({ filteredItems: filtered });
@@ -56,20 +53,21 @@ class Categoria extends Component {
     };
 
     clearFilters = () => {
-        this.setState({filterNome: '', filterDescricao: ''}, this.applyFilters);
+        this.setState({filterNome: '', filterAtivo: 'all'}, this.applyFilters);
     }
 
     handleChange = (event) => {
+        const { name, value, type, checked } = event.target;
         this.setState({ 
-            [event.target.name]: event.target.value 
+            [name]: type === 'checkbox' ? checked : value 
         });
     };
 
     fillLists = () => {
-        this.categoriaService.listAll()
+        this.palavraChaveService.listAll()
             .then((response) => {
                 this.setState({
-                    categorias: response.data, 
+                    palavrasChave: response.data, 
                     filteredItems: response.data
                 });
             })
@@ -82,29 +80,25 @@ class Categoria extends Component {
                     pauseOnHover: true,
                     draggable: true,
                     progress: undefined,
-                  });
+                });
             });
     }
 
     beginInsertion = () => {
         this.setState({
             showModalCreate: true,
-            nomeCategoria: '',
-            descricaoCategoria: ''
+            nome: '',
+            ativo: true
         });
     }
 
     validateForm = () => {
-        if (!this.state.nomeCategoria || this.state.nomeCategoria.trim() === '') {
-            toast.error('O nome da categoria é obrigatório');
+        if (!this.state.nome || this.state.nome.trim() === '') {
+            toast.error('O nome é obrigatório');
             return false;
         }
-        if (this.state.nomeCategoria.length > 50) {
-            toast.error('O nome da categoria deve ter no máximo 50 caracteres');
-            return false;
-        }
-        if (!this.state.descricaoCategoria || this.state.descricaoCategoria.trim() === '') {
-            toast.error('A descrição da categoria é obrigatória');
+        if (this.state.nome.length > 30) {
+            toast.error('O nome deve ter no máximo 30 caracteres');
             return false;
         }
         return true;
@@ -112,19 +106,19 @@ class Categoria extends Component {
 
     clearState = () => {
         this.setState({
-            nomeCategoria: '',
-            descricaoCategoria: ''
+            nome: '',
+            ativo: true
         });
     }
 
-    beginDeletion = (categoria) => {
-        this.setState({ toDeleteItem: categoria, showModalDeletion: true });
-	}
+    beginDeletion = (palavra) => {
+        this.setState({ toDeleteItem: palavra, showModalDeletion: true });
+    }
 
     delete = () => {
-        this.categoriaService.delete(this.state.toDeleteItem.id)
+        this.palavraChaveService.delete(this.state.toDeleteItem.id)
             .then(() => {
-                toast.success('Categoria excluída com sucesso!', {
+                toast.success('Palavra-chave excluída com sucesso!', {
                     position: "top-right",
                     autoClose: 2000,
                     hideProgressBar: false,
@@ -137,8 +131,7 @@ class Categoria extends Component {
                 this.closeModal('Deletion');
             })
             .catch((error) => {
-                const message = error.response?.data?.message || 'Erro ao excluir categoria';
-                toast.error(message, {
+                toast.error('Erro ao excluir palavra-chave', {
                     position: "top-right",
                     autoClose: 2000,
                     hideProgressBar: false,
@@ -152,40 +145,15 @@ class Categoria extends Component {
 
     closeModal = (operationName) => {
         this.clearState();
-        const modalKey = 'showModal' + operationName;
-        let itemKey = null;
-        
-        if (operationName === 'Deletion') {
-            itemKey = 'toDeleteItem';
-        } else if (operationName === 'Edit') {
-            itemKey = 'toEditItem';
-        } else if (operationName === 'View') {
-            itemKey = 'toViewItem';
-        } else if (operationName === 'Create') {
-            itemKey = null; // Não tem item para Create
-        }
-        
-        const updateState = { [modalKey]: false };
-        if (itemKey) {
-            updateState[itemKey] = null;
-        }
-        
-        this.setState(updateState);
+        this.setState({ ['showModal' + operationName]: false, ['to' + operationName + 'Item']: null });
     }
 
-    beginView = (categoria) => {
-        this.setState({ 
-            showModalView: true,
-            toViewItem: categoria
-        });
-    }
-
-    beginEdit = (categoria) => {
+    beginEdit = (palavra) => {
         this.setState({ 
             showModalEdit: true,
-            toEditItem: categoria,
-            nomeCategoria: categoria.nomeCategoria,
-            descricaoCategoria: categoria.descricaoCategoria
+            toEditItem: palavra,
+            nome: palavra.nome,
+            ativo: palavra.ativo
         });
     }
 
@@ -194,14 +162,14 @@ class Categoria extends Component {
         if (!this.validateForm()) return;
 
         const data = {
-            nomeCategoria: this.state.nomeCategoria.trim(),
-            descricaoCategoria: this.state.descricaoCategoria.trim()
+            nome: this.state.nome,
+            ativo: this.state.ativo
         };
 
         if (this.state.showModalCreate) {
-            this.categoriaService.insert(data)
+            this.palavraChaveService.insert(data)
                 .then(() => {
-                    toast.success('Categoria criada com sucesso!', {
+                    toast.success('Palavra-chave criada com sucesso!', {
                         position: "top-right",
                         autoClose: 2000,
                         hideProgressBar: false,
@@ -214,7 +182,7 @@ class Categoria extends Component {
                     this.closeModal('Create');
                 })
                 .catch((error) => {
-                    const message = error.response?.data?.message || 'Erro ao criar categoria';
+                    const message = error.response?.data?.message || 'Erro ao criar palavra-chave';
                     toast.error(message, {
                         position: "top-right",
                         autoClose: 3000,
@@ -226,9 +194,9 @@ class Categoria extends Component {
                     });
                 });
         } else if (this.state.showModalEdit) {
-            this.categoriaService.update(this.state.toEditItem.id, data)
+            this.palavraChaveService.update(this.state.toEditItem.id, data)
                 .then(() => {
-                    toast.success('Categoria atualizada com sucesso!', {
+                    toast.success('Palavra-chave atualizada com sucesso!', {
                         position: "top-right",
                         autoClose: 2000,
                         hideProgressBar: false,
@@ -241,7 +209,7 @@ class Categoria extends Component {
                     this.closeModal('Edit');
                 })
                 .catch((error) => {
-                    const message = error.response?.data?.message || 'Erro ao atualizar categoria';
+                    const message = error.response?.data?.message || 'Erro ao atualizar palavra-chave';
                     toast.error(message, {
                         position: "top-right",
                         autoClose: 3000,
@@ -272,7 +240,7 @@ class Categoria extends Component {
             >
                 <div className="row mb-4 mt-4">
                     <div className="col-12">
-                        <h1 className='display-5 fw-bold mb-4 tittle tittleAfter'>Categorias</h1>
+                        <h1 className='display-5 fw-bold mb-4 tittle tittleAfter'>Palavras-Chave</h1>
                     </div>
                 </div>
 
@@ -285,18 +253,7 @@ class Categoria extends Component {
                             onClick={this.beginInsertion}
                         >
                             <i className="bi bi-file-earmark-plus fs-4 me-2"></i>
-                            <span>Nova Categoria</span>
-                        </motion.button>
-                    </div>
-                    <div className="col-auto">
-                        <motion.button 
-                            whileHover={{ scale: 1.05 }}
-                            whileTap={{ scale: 0.95 }}
-                            className="btn btn-secondary btn-lg d-flex align-items-center categories-button styled-button"
-                            onClick={() => this.props.navigate('/subcategorias')}
-                        >
-                            <i className="bi bi-tags fs-4 me-2"></i>
-                            <span>Subcategorias</span>
+                            <span>Nova Palavra-Chave</span>
                         </motion.button>
                     </div>
                     <div className="col-auto">
@@ -318,7 +275,7 @@ class Categoria extends Component {
                             <div className="card-body p-4">
                                 <h5 className="card-title mb-3">Filtros</h5>
                                 <div className="row">
-                                    <div className="col-md-5 mb-3">
+                                    <div className="col-md-6 mb-3">
                                         <label htmlFor="filterNome" className="form-label">Nome</label>
                                         <input 
                                             type="text" 
@@ -330,17 +287,19 @@ class Categoria extends Component {
                                             onChange={this.handleFilterChange}
                                         />
                                     </div>
-                                    <div className="col-md-5 mb-3">
-                                        <label htmlFor="filterDescricao" className="form-label">Descrição</label>
-                                        <input 
-                                            type="text" 
-                                            className="form-control" 
-                                            id="filterDescricao"
-                                            name="filterDescricao"
-                                            placeholder="Buscar por descrição..."
-                                            value={this.state.filterDescricao}
+                                    <div className="col-md-4 mb-3">
+                                        <label htmlFor="filterAtivo" className="form-label">Status</label>
+                                        <select 
+                                            className="form-select" 
+                                            id="filterAtivo"
+                                            name="filterAtivo"
+                                            value={this.state.filterAtivo}
                                             onChange={this.handleFilterChange}
-                                        />
+                                        >
+                                            <option value="all">Todos</option>
+                                            <option value="true">Ativo</option>
+                                            <option value="false">Inativo</option>
+                                        </select>
                                     </div>
                                     <div className="col-md-2 mb-3 d-flex align-items-end">
                                         <button 
@@ -365,7 +324,7 @@ class Categoria extends Component {
                                         <thead>
                                             <tr>
                                                 <th scope="col">Nome</th>
-                                                <th scope="col">Descrição</th>
+                                                <th scope="col">Status</th>
                                                 <th scope="col" className="text-end">Ações</th>
                                             </tr>
                                         </thead>
@@ -373,36 +332,29 @@ class Categoria extends Component {
                                             {this.state.filteredItems.length === 0 ? (
                                                 <tr>
                                                     <td colSpan="3" className="text-center text-muted py-5">
-                                                        Nenhuma categoria encontrada
+                                                        Nenhuma palavra-chave encontrada
                                                     </td>
                                                 </tr>
                                             ) : (
-                                                this.state.filteredItems.map((categoria) => (
-                                                    <tr key={categoria.id}>
-                                                        <td>{categoria.nomeCategoria}</td>
+                                                this.state.filteredItems.map((palavra) => (
+                                                    <tr key={palavra.id}>
+                                                        <td>{palavra.nome}</td>
                                                         <td>
-                                                            <span className="text-truncate d-inline-block" style={{maxWidth: '500px'}} title={categoria.descricaoCategoria}>
-                                                                {categoria.descricaoCategoria}
+                                                            <span className={`badge ${palavra.ativo ? 'bg-success' : 'bg-secondary'}`}>
+                                                                {palavra.ativo ? 'Ativo' : 'Inativo'}
                                                             </span>
                                                         </td>
                                                         <td className="text-end">
                                                             <button 
-                                                                className="btn btn-sm btn-outline-info me-2"
-                                                                onClick={() => this.beginView(categoria)}
-                                                            >
-                                                                <i className="bi bi-eye me-1"></i>
-                                                                Ver
-                                                            </button>
-                                                            <button 
                                                                 className="btn btn-sm btn-outline-primary me-2"
-                                                                onClick={() => this.beginEdit(categoria)}
+                                                                onClick={() => this.beginEdit(palavra)}
                                                             >
                                                                 <i className="bi bi-pencil me-1"></i>
                                                                 Editar
                                                             </button>
                                                             <button 
                                                                 className="btn btn-sm btn-outline-danger"
-                                                                onClick={() => this.beginDeletion(categoria)}
+                                                                onClick={() => this.beginDeletion(palavra)}
                                                             >
                                                                 <i className="bi bi-trash me-1"></i>
                                                                 Excluir
@@ -428,7 +380,7 @@ class Categoria extends Component {
                                 <Modal.Title>Confirmar Exclusão</Modal.Title>
                             </Modal.Header>
                             <Modal.Body>
-                                Tem certeza que deseja excluir a categoria "{this.state.toDeleteItem?.nomeCategoria}"?
+                                Tem certeza que deseja excluir a palavra-chave "{this.state.toDeleteItem?.nome}"?
                             </Modal.Body>
                             <Modal.Footer>
                                 <Button variant="secondary" onClick={() => this.closeModal('Deletion')}>
@@ -443,70 +395,47 @@ class Categoria extends Component {
                 </AnimatePresence>
 
                 <AnimatePresence>
-                    {this.state.showModalView && (
-                        <Modal show={this.state.showModalView} onHide={() => this.closeModal('View')} centered size='lg'>
-                            <Modal.Header className='bg-dark text-white' closeButton closeVariant='white'>
-                                <Modal.Title>Detalhes da Categoria</Modal.Title>
-                            </Modal.Header>
-                            <Modal.Body>
-                                <div className="mb-3">
-                                    <label className="form-label fw-bold">Nome da Categoria:</label>
-                                    <p className="form-control-plaintext">{this.state.toViewItem?.nomeCategoria}</p>
-                                </div>
-                                <div className="mb-3">
-                                    <label className="form-label fw-bold">Descrição:</label>
-                                    <p className="form-control-plaintext">{this.state.toViewItem?.descricaoCategoria}</p>
-                                </div>
-                            </Modal.Body>
-                            <Modal.Footer>
-                            <Button variant="secondary" onClick={() => this.closeModal('View')}>
-                                Fechar
-                            </Button>
-                            </Modal.Footer>
-                        </Modal>
-                    )}
-                </AnimatePresence>
-
-                <AnimatePresence>
                     {this.state.showModalEdit && (
                         <Modal show={this.state.showModalEdit} onHide={() => this.closeModal('Edit')} centered size='lg'>
                             <Modal.Header className='bg-dark text-white' closeButton closeVariant='white'>
-                                <Modal.Title>Editar Categoria</Modal.Title>
+                            <Modal.Title>Editar Palavra-Chave</Modal.Title>
                             </Modal.Header>
                             <form onSubmit={this.submitForm}>
                             <Modal.Body>
-                                    <div className="mb-3">
-                                        <label htmlFor="editNomeCategoria" className="form-label">Nome da Categoria *</label>
+                                <div className="mb-3">
+                                    <label htmlFor="editNome" className="form-label">Nome</label>
+                                    <input 
+                                        type="text" 
+                                        className="form-control" 
+                                        id="editNome"
+                                        name="nome"
+                                        placeholder="Digite o nome da palavra-chave..."
+                                        value={this.state.nome}
+                                        onChange={this.handleChange}
+                                        maxLength="30"
+                                        required
+                                    />
+                                    <small className="form-text text-muted">Máximo 30 caracteres</small>
+                                </div>
+                                <div className="mb-3">
+                                    <div className="form-check form-switch">
                                         <input 
-                                            type="text" 
-                                            className="form-control" 
-                                            id="editNomeCategoria"
-                                            name="nomeCategoria"
-                                            placeholder="Digite o nome da categoria..."
-                                            value={this.state.nomeCategoria}
+                                            className="form-check-input" 
+                                            type="checkbox" 
+                                            id="editAtivo"
+                                            name="ativo"
+                                            checked={this.state.ativo}
                                             onChange={this.handleChange}
-                                            maxLength="50"
-                                            required
                                         />
-                                        <small className="form-text text-muted">Máximo 50 caracteres</small>
+                                        <label className="form-check-label" htmlFor="editAtivo">
+                                            Status Ativo
+                                        </label>
                                     </div>
-                                    <div className="mb-3">
-                                        <label htmlFor="editDescricaoCategoria" className="form-label">Descrição *</label>
-                                        <textarea 
-                                            className="form-control" 
-                                            id="editDescricaoCategoria"
-                                            name="descricaoCategoria"
-                                            placeholder="Digite a descrição da categoria..."
-                                            value={this.state.descricaoCategoria}
-                                            onChange={this.handleChange}
-                                            rows="4"
-                                            required
-                                        />
-                                    </div>
+                                </div>
                             </Modal.Body>
                             <Modal.Footer>
                                 <Button variant="secondary" onClick={() => this.closeModal('Edit')}>
-                                        Cancelar
+                                    Cancelar
                                 </Button>
                                 <button type='submit' className="btn btn-primary">Salvar</button>
                             </Modal.Footer>
@@ -519,45 +448,47 @@ class Categoria extends Component {
                     {this.state.showModalCreate && (
                         <Modal show={this.state.showModalCreate} onHide={() => this.closeModal('Create')} centered size='lg'>
                             <Modal.Header className='bg-dark text-white' closeButton closeVariant='white'>
-                                <Modal.Title>Nova Categoria</Modal.Title>
+                            <Modal.Title>Nova Palavra-Chave</Modal.Title>
                             </Modal.Header>
                             <form onSubmit={this.submitForm}>
-                                <Modal.Body>
-                                    <div className="mb-3">
-                                        <label htmlFor="createNomeCategoria" className="form-label">Nome da Categoria *</label>
+                            <Modal.Body>
+                                <div className="mb-3">
+                                    <label htmlFor="createNome" className="form-label">Nome *</label>
+                                    <input 
+                                        type="text" 
+                                        className="form-control" 
+                                        id="createNome"
+                                        name="nome"
+                                        placeholder="Digite o nome da palavra-chave..."
+                                        value={this.state.nome}
+                                        onChange={this.handleChange}
+                                        maxLength="30"
+                                        required
+                                    />
+                                    <small className="form-text text-muted">Máximo 30 caracteres</small>
+                                </div>
+                                <div className="mb-3">
+                                    <div className="form-check form-switch">
                                         <input 
-                                            type="text" 
-                                            className="form-control" 
-                                            id="createNomeCategoria"
-                                            name="nomeCategoria"
-                                            placeholder="Digite o nome da categoria..."
-                                            value={this.state.nomeCategoria}
+                                            className="form-check-input" 
+                                            type="checkbox" 
+                                            id="createAtivo"
+                                            name="ativo"
+                                            checked={this.state.ativo}
                                             onChange={this.handleChange}
-                                            maxLength="50"
-                                            required
                                         />
-                                        <small className="form-text text-muted">Máximo 50 caracteres</small>
+                                        <label className="form-check-label" htmlFor="createAtivo">
+                                            Status Ativo (padrão: ativado)
+                                        </label>
                                     </div>
-                                    <div className="mb-3">
-                                        <label htmlFor="createDescricaoCategoria" className="form-label">Descrição *</label>
-                                        <textarea 
-                                            className="form-control" 
-                                            id="createDescricaoCategoria"
-                                            name="descricaoCategoria"
-                                            placeholder="Digite a descrição da categoria..."
-                                            value={this.state.descricaoCategoria}
-                                            onChange={this.handleChange}
-                                            rows="4"
-                                            required
-                                        />
-                                    </div>
-                                </Modal.Body>
-                                <Modal.Footer>
-                                    <Button variant="secondary" onClick={() => this.closeModal('Create')}>
-                                        Cancelar
-                                    </Button>
-                                    <button type='submit' className="btn btn-primary">Criar</button>
-                                </Modal.Footer>
+                                </div>
+                            </Modal.Body>
+                            <Modal.Footer>
+                                <Button variant="secondary" onClick={() => this.closeModal('Create')}>
+                                    Cancelar
+                                </Button>
+                                <button type='submit' className="btn btn-primary">Criar</button>
+                            </Modal.Footer>
                             </form>
                         </Modal>
                     )}
@@ -568,5 +499,5 @@ class Categoria extends Component {
   }
 }
 
-export default withNavigate(Categoria);
+export default withNavigate(PalavraChave);
 
