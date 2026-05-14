@@ -28,7 +28,7 @@ export class BaseService {
         }, async (error) => {
             // const originalConfig = error.config;
             // console.log(error.response.status);
-            if (error.response.status === 401) {
+            if (error.response && error.response.status === 401) {
                 //Fazer o refresh token
                 //Se o refresh token falhar, redirecionar para a tela de login
                 sessionStorage.removeItem("token");

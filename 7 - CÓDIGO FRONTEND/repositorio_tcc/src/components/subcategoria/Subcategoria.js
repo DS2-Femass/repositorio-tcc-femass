@@ -4,22 +4,26 @@ import Navbar from '../navbar/Navbar';
 import { Button, Modal } from 'react-bootstrap';
 import { ToastContainer, toast } from 'react-toastify';
 import { motion, AnimatePresence } from 'framer-motion';
+import { SubcategoriaService } from '../../service/SubcategoriaService';
 import { CategoriaService } from '../../service/CategoriaService';
+import Select from 'react-select';
 
 function withNavigate(Component) {
     return (props) => {
       const navigate = useNavigate();
       return <Component {...props} navigate={navigate} />;
     };
-  }
+}
 
-class Categoria extends Component {
+class Subcategoria extends Component {
   
     state = {
-        categorias: [],
+        subcategorias: [],
         filteredItems: [],
+        optionsCategorias: [],
         filterNome: '',
         filterDescricao: '',
+        filterCategoria: null,
         toDeleteItem: null,
         showModalDeletion: false,
         showModalEdit: false,
@@ -27,24 +31,33 @@ class Categoria extends Component {
         showModalView: false,
         toEditItem: null,
         toViewItem: null,
-        nomeCategoria: '',
-        descricaoCategoria: '',
+        nomeSubcategoria: '',
+        descricaoSubcategoria: '',
+        selectedCategoria: null,
+        isCategoriaInvalid: false,
     }
 
+    subcategoriaService = new SubcategoriaService();
     categoriaService = new CategoriaService();
 
     applyFilters = () => {
-        let filtered = [...this.state.categorias];
+        let filtered = [...this.state.subcategorias];
         
         if (this.state.filterNome) {
             filtered = filtered.filter(item => 
-                item.nomeCategoria.toLowerCase().includes(this.state.filterNome.toLowerCase())
+                item.nomeSubcategoria.toLowerCase().includes(this.state.filterNome.toLowerCase())
             );
         }
 
         if (this.state.filterDescricao) {
             filtered = filtered.filter(item => 
-                item.descricaoCategoria.toLowerCase().includes(this.state.filterDescricao.toLowerCase())
+                item.descricaoSubcategoria.toLowerCase().includes(this.state.filterDescricao.toLowerCase())
+            );
+        }
+
+        if (this.state.filterCategoria) {
+            filtered = filtered.filter(item => 
+                item.idCategoria === this.state.filterCategoria.value
             );
         }
 
@@ -55,8 +68,12 @@ class Categoria extends Component {
         this.setState({ [event.target.name]: event.target.value }, this.applyFilters);
     };
 
+    handleFilterCategoriaChange = (selectedOption) => {
+        this.setState({ filterCategoria: selectedOption }, this.applyFilters);
+    };
+
     clearFilters = () => {
-        this.setState({filterNome: '', filterDescricao: ''}, this.applyFilters);
+        this.setState({filterNome: '', filterDescricao: '', filterCategoria: null}, this.applyFilters);
     }
 
     handleChange = (event) => {
@@ -65,12 +82,33 @@ class Categoria extends Component {
         });
     };
 
+    handleCategoriaChange = (selectedOption) => {
+        this.setState({ 
+            selectedCategoria: selectedOption,
+            isCategoriaInvalid: !selectedOption
+        });
+    };
+
     fillLists = () => {
-        this.categoriaService.listAll()
-            .then((response) => {
+        Promise.all([
+            this.subcategoriaService.listAll(),
+            this.categoriaService.listAll()
+        ])
+            .then(([subcategoriasResponse, categoriasResponse]) => {
+                const categoriasMap = {};
+                categoriasResponse.data.forEach(cat => {
+                    categoriasMap[cat.id] = cat.nomeCategoria;
+                });
+
+                // Adiciona o nome da categoria a cada subcategoria
+                const subcategoriasComCategoria = subcategoriasResponse.data.map(sub => ({
+                    ...sub,
+                    nomeCategoria: categoriasMap[sub.idCategoria] || 'N/A'
+                }));
+
                 this.setState({
-                    categorias: response.data, 
-                    filteredItems: response.data
+                    subcategorias: subcategoriasComCategoria, 
+                    filteredItems: subcategoriasComCategoria
                 });
             })
             .catch((error) => {
@@ -86,25 +124,47 @@ class Categoria extends Component {
             });
     }
 
+    fillOptionsCategorias = () => {
+        this.categoriaService.listAll()
+            .then((response) => {
+                const optionsCategorias = response.data.map(categoria => ({
+                    value: categoria.id,
+                    label: categoria.nomeCategoria
+                }));
+                this.setState({ optionsCategorias });
+            })
+            .catch((error) => {
+                console.error('Erro ao carregar categorias:', error);
+            });
+    }
+
     beginInsertion = () => {
+        this.fillOptionsCategorias();
         this.setState({
             showModalCreate: true,
-            nomeCategoria: '',
-            descricaoCategoria: ''
+            nomeSubcategoria: '',
+            descricaoSubcategoria: '',
+            selectedCategoria: null,
+            isCategoriaInvalid: false
         });
     }
 
     validateForm = () => {
-        if (!this.state.nomeCategoria || this.state.nomeCategoria.trim() === '') {
-            toast.error('O nome da categoria é obrigatório');
+        if (!this.state.nomeSubcategoria || this.state.nomeSubcategoria.trim() === '') {
+            toast.error('O nome da subcategoria é obrigatório');
             return false;
         }
-        if (this.state.nomeCategoria.length > 50) {
-            toast.error('O nome da categoria deve ter no máximo 50 caracteres');
+        if (this.state.nomeSubcategoria.length > 50) {
+            toast.error('O nome da subcategoria deve ter no máximo 50 caracteres');
             return false;
         }
-        if (!this.state.descricaoCategoria || this.state.descricaoCategoria.trim() === '') {
-            toast.error('A descrição da categoria é obrigatória');
+        if (!this.state.descricaoSubcategoria || this.state.descricaoSubcategoria.trim() === '') {
+            toast.error('A descrição da subcategoria é obrigatória');
+            return false;
+        }
+        if (!this.state.selectedCategoria) {
+            toast.error('A categoria é obrigatória');
+            this.setState({ isCategoriaInvalid: true });
             return false;
         }
         return true;
@@ -112,19 +172,21 @@ class Categoria extends Component {
 
     clearState = () => {
         this.setState({
-            nomeCategoria: '',
-            descricaoCategoria: ''
+            nomeSubcategoria: '',
+            descricaoSubcategoria: '',
+            selectedCategoria: null,
+            isCategoriaInvalid: false
         });
     }
 
-    beginDeletion = (categoria) => {
-        this.setState({ toDeleteItem: categoria, showModalDeletion: true });
-	}
+    beginDeletion = (subcategoria) => {
+        this.setState({ toDeleteItem: subcategoria, showModalDeletion: true });
+    }
 
     delete = () => {
-        this.categoriaService.delete(this.state.toDeleteItem.id)
+        this.subcategoriaService.delete(this.state.toDeleteItem.id)
             .then(() => {
-                toast.success('Categoria excluída com sucesso!', {
+                toast.success('Subcategoria excluída com sucesso!', {
                     position: "top-right",
                     autoClose: 2000,
                     hideProgressBar: false,
@@ -137,7 +199,7 @@ class Categoria extends Component {
                 this.closeModal('Deletion');
             })
             .catch((error) => {
-                const message = error.response?.data?.message || 'Erro ao excluir categoria';
+                const message = error.response?.data?.message || 'Erro ao excluir subcategoria';
                 toast.error(message, {
                     position: "top-right",
                     autoClose: 2000,
@@ -162,7 +224,7 @@ class Categoria extends Component {
         } else if (operationName === 'View') {
             itemKey = 'toViewItem';
         } else if (operationName === 'Create') {
-            itemKey = null; // Não tem item para Create
+            itemKey = null;
         }
         
         const updateState = { [modalKey]: false };
@@ -173,20 +235,66 @@ class Categoria extends Component {
         this.setState(updateState);
     }
 
-    beginView = (categoria) => {
-        this.setState({ 
-            showModalView: true,
-            toViewItem: categoria
-        });
+    beginView = (subcategoria) => {
+        // Busca o nome da categoria
+        if (subcategoria.idCategoria) {
+            this.categoriaService.findById(subcategoria.idCategoria)
+                .then((response) => {
+                    this.setState({ 
+                        showModalView: true,
+                        toViewItem: {
+                            ...subcategoria,
+                            nomeCategoria: response.data.nomeCategoria
+                        }
+                    });
+                })
+                .catch(() => {
+                    this.setState({ 
+                        showModalView: true,
+                        toViewItem: subcategoria
+                    });
+                });
+        } else {
+            this.setState({ 
+                showModalView: true,
+                toViewItem: subcategoria
+            });
+        }
     }
 
-    beginEdit = (categoria) => {
+    beginEdit = (subcategoria) => {
+        this.fillOptionsCategorias();
+        
+        // Busca o nome da categoria para o select
+        const categoriaOption = subcategoria.idCategoria ? {
+            value: subcategoria.idCategoria,
+            label: 'Carregando...'
+        } : null;
+
         this.setState({ 
             showModalEdit: true,
-            toEditItem: categoria,
-            nomeCategoria: categoria.nomeCategoria,
-            descricaoCategoria: categoria.descricaoCategoria
+            toEditItem: subcategoria,
+            nomeSubcategoria: subcategoria.nomeSubcategoria,
+            descricaoSubcategoria: subcategoria.descricaoSubcategoria,
+            selectedCategoria: categoriaOption,
+            isCategoriaInvalid: false
         });
+
+        // Busca o nome da categoria
+        if (subcategoria.idCategoria) {
+            this.categoriaService.findById(subcategoria.idCategoria)
+                .then((response) => {
+                    this.setState({
+                        selectedCategoria: {
+                            value: subcategoria.idCategoria,
+                            label: response.data.nomeCategoria
+                        }
+                    });
+                })
+                .catch(() => {
+                    // Mantém o estado mesmo se não conseguir buscar
+                });
+        }
     }
 
     submitForm = (event) => {
@@ -194,14 +302,15 @@ class Categoria extends Component {
         if (!this.validateForm()) return;
 
         const data = {
-            nomeCategoria: this.state.nomeCategoria.trim(),
-            descricaoCategoria: this.state.descricaoCategoria.trim()
+            nomeSubcategoria: this.state.nomeSubcategoria.trim(),
+            descricaoSubcategoria: this.state.descricaoSubcategoria.trim(),
+            idCategoria: this.state.selectedCategoria.value
         };
 
         if (this.state.showModalCreate) {
-            this.categoriaService.insert(data)
+            this.subcategoriaService.insert(data)
                 .then(() => {
-                    toast.success('Categoria criada com sucesso!', {
+                    toast.success('Subcategoria criada com sucesso!', {
                         position: "top-right",
                         autoClose: 2000,
                         hideProgressBar: false,
@@ -214,7 +323,7 @@ class Categoria extends Component {
                     this.closeModal('Create');
                 })
                 .catch((error) => {
-                    const message = error.response?.data?.message || 'Erro ao criar categoria';
+                    const message = error.response?.data?.message || 'Erro ao criar subcategoria';
                     toast.error(message, {
                         position: "top-right",
                         autoClose: 3000,
@@ -226,9 +335,9 @@ class Categoria extends Component {
                     });
                 });
         } else if (this.state.showModalEdit) {
-            this.categoriaService.update(this.state.toEditItem.id, data)
+            this.subcategoriaService.update(this.state.toEditItem.id, data)
                 .then(() => {
-                    toast.success('Categoria atualizada com sucesso!', {
+                    toast.success('Subcategoria atualizada com sucesso!', {
                         position: "top-right",
                         autoClose: 2000,
                         hideProgressBar: false,
@@ -241,7 +350,7 @@ class Categoria extends Component {
                     this.closeModal('Edit');
                 })
                 .catch((error) => {
-                    const message = error.response?.data?.message || 'Erro ao atualizar categoria';
+                    const message = error.response?.data?.message || 'Erro ao atualizar subcategoria';
                     toast.error(message, {
                         position: "top-right",
                         autoClose: 3000,
@@ -257,6 +366,7 @@ class Categoria extends Component {
 
     componentDidMount() {
         this.fillLists();
+        this.fillOptionsCategorias();
     }
 
     render() {
@@ -272,7 +382,7 @@ class Categoria extends Component {
             >
                 <div className="row mb-4 mt-4">
                     <div className="col-12">
-                        <h1 className='display-5 fw-bold mb-4 tittle tittleAfter'>Categorias</h1>
+                        <h1 className='display-5 fw-bold mb-4 tittle tittleAfter'>Subcategorias</h1>
                     </div>
                 </div>
 
@@ -285,7 +395,7 @@ class Categoria extends Component {
                             onClick={this.beginInsertion}
                         >
                             <i className="bi bi-file-earmark-plus fs-4 me-2"></i>
-                            <span>Nova Categoria</span>
+                            <span>Nova Subcategoria</span>
                         </motion.button>
                     </div>
                     <div className="col-auto">
@@ -293,10 +403,10 @@ class Categoria extends Component {
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}
                             className="btn btn-secondary btn-lg d-flex align-items-center categories-button styled-button"
-                            onClick={() => this.props.navigate('/subcategorias')}
+                            onClick={() => this.props.navigate('/categorias')}
                         >
                             <i className="bi bi-tags fs-4 me-2"></i>
-                            <span>Subcategorias</span>
+                            <span>Categorias</span>
                         </motion.button>
                     </div>
                     <div className="col-auto">
@@ -318,7 +428,7 @@ class Categoria extends Component {
                             <div className="card-body p-4">
                                 <h5 className="card-title mb-3">Filtros</h5>
                                 <div className="row">
-                                    <div className="col-md-5 mb-3">
+                                    <div className="col-md-4 mb-3">
                                         <label htmlFor="filterNome" className="form-label">Nome</label>
                                         <input 
                                             type="text" 
@@ -330,7 +440,7 @@ class Categoria extends Component {
                                             onChange={this.handleFilterChange}
                                         />
                                     </div>
-                                    <div className="col-md-5 mb-3">
+                                    <div className="col-md-4 mb-3">
                                         <label htmlFor="filterDescricao" className="form-label">Descrição</label>
                                         <input 
                                             type="text" 
@@ -342,7 +452,22 @@ class Categoria extends Component {
                                             onChange={this.handleFilterChange}
                                         />
                                     </div>
-                                    <div className="col-md-2 mb-3 d-flex align-items-end">
+                                    <div className="col-md-3 mb-3">
+                                        <label htmlFor="filterCategoria" className="form-label">Categoria</label>
+                                        <Select
+                                            className="basic-single"
+                                            classNamePrefix="select"
+                                            isClearable={true}
+                                            isSearchable={true}
+                                            name="filterCategoria"
+                                            options={this.state.optionsCategorias}
+                                            noOptionsMessage={() => "Não há categorias cadastradas"}
+                                            placeholder="Filtrar por categoria..."
+                                            value={this.state.filterCategoria}
+                                            onChange={this.handleFilterCategoriaChange}
+                                        />
+                                    </div>
+                                    <div className="col-md-1 mb-3 d-flex align-items-end">
                                         <button 
                                             className="btn btn-secondary w-100" 
                                             onClick={this.clearFilters}
@@ -366,43 +491,45 @@ class Categoria extends Component {
                                             <tr>
                                                 <th scope="col">Nome</th>
                                                 <th scope="col">Descrição</th>
+                                                <th scope="col">Categoria</th>
                                                 <th scope="col" className="text-end">Ações</th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             {this.state.filteredItems.length === 0 ? (
                                                 <tr>
-                                                    <td colSpan="3" className="text-center text-muted py-5">
-                                                        Nenhuma categoria encontrada
+                                                    <td colSpan="4" className="text-center text-muted py-5">
+                                                        Nenhuma subcategoria encontrada
                                                     </td>
                                                 </tr>
                                             ) : (
-                                                this.state.filteredItems.map((categoria) => (
-                                                    <tr key={categoria.id}>
-                                                        <td>{categoria.nomeCategoria}</td>
+                                                this.state.filteredItems.map((subcategoria) => (
+                                                    <tr key={subcategoria.id}>
+                                                        <td>{subcategoria.nomeSubcategoria}</td>
                                                         <td>
-                                                            <span className="text-truncate d-inline-block" style={{maxWidth: '500px'}} title={categoria.descricaoCategoria}>
-                                                                {categoria.descricaoCategoria}
+                                                            <span className="text-truncate d-inline-block" style={{maxWidth: '400px'}} title={subcategoria.descricaoSubcategoria}>
+                                                                {subcategoria.descricaoSubcategoria}
                                                             </span>
                                                         </td>
+                                                        <td>{subcategoria.nomeCategoria || 'N/A'}</td>
                                                         <td className="text-end">
                                                             <button 
                                                                 className="btn btn-sm btn-outline-info me-2"
-                                                                onClick={() => this.beginView(categoria)}
+                                                                onClick={() => this.beginView(subcategoria)}
                                                             >
                                                                 <i className="bi bi-eye me-1"></i>
                                                                 Ver
                                                             </button>
                                                             <button 
                                                                 className="btn btn-sm btn-outline-primary me-2"
-                                                                onClick={() => this.beginEdit(categoria)}
+                                                                onClick={() => this.beginEdit(subcategoria)}
                                                             >
                                                                 <i className="bi bi-pencil me-1"></i>
                                                                 Editar
                                                             </button>
                                                             <button 
                                                                 className="btn btn-sm btn-outline-danger"
-                                                                onClick={() => this.beginDeletion(categoria)}
+                                                                onClick={() => this.beginDeletion(subcategoria)}
                                                             >
                                                                 <i className="bi bi-trash me-1"></i>
                                                                 Excluir
@@ -428,7 +555,7 @@ class Categoria extends Component {
                                 <Modal.Title>Confirmar Exclusão</Modal.Title>
                             </Modal.Header>
                             <Modal.Body>
-                                Tem certeza que deseja excluir a categoria "{this.state.toDeleteItem?.nomeCategoria}"?
+                                Tem certeza que deseja excluir a subcategoria "{this.state.toDeleteItem?.nomeSubcategoria}"?
                             </Modal.Body>
                             <Modal.Footer>
                                 <Button variant="secondary" onClick={() => this.closeModal('Deletion')}>
@@ -446,22 +573,26 @@ class Categoria extends Component {
                     {this.state.showModalView && (
                         <Modal show={this.state.showModalView} onHide={() => this.closeModal('View')} centered size='lg'>
                             <Modal.Header className='bg-dark text-white' closeButton closeVariant='white'>
-                                <Modal.Title>Detalhes da Categoria</Modal.Title>
+                                <Modal.Title>Detalhes da Subcategoria</Modal.Title>
                             </Modal.Header>
                             <Modal.Body>
                                 <div className="mb-3">
-                                    <label className="form-label fw-bold">Nome da Categoria:</label>
-                                    <p className="form-control-plaintext">{this.state.toViewItem?.nomeCategoria}</p>
+                                    <label className="form-label fw-bold">Nome da Subcategoria:</label>
+                                    <p className="form-control-plaintext">{this.state.toViewItem?.nomeSubcategoria}</p>
                                 </div>
                                 <div className="mb-3">
                                     <label className="form-label fw-bold">Descrição:</label>
-                                    <p className="form-control-plaintext">{this.state.toViewItem?.descricaoCategoria}</p>
+                                    <p className="form-control-plaintext">{this.state.toViewItem?.descricaoSubcategoria}</p>
+                                </div>
+                                <div className="mb-3">
+                                    <label className="form-label fw-bold">Categoria:</label>
+                                    <p className="form-control-plaintext">{this.state.toViewItem?.nomeCategoria || 'N/A'}</p>
                                 </div>
                             </Modal.Body>
                             <Modal.Footer>
-                            <Button variant="secondary" onClick={() => this.closeModal('View')}>
-                                Fechar
-                            </Button>
+                                <Button variant="secondary" onClick={() => this.closeModal('View')}>
+                                    Fechar
+                                </Button>
                             </Modal.Footer>
                         </Modal>
                     )}
@@ -471,19 +602,19 @@ class Categoria extends Component {
                     {this.state.showModalEdit && (
                         <Modal show={this.state.showModalEdit} onHide={() => this.closeModal('Edit')} centered size='lg'>
                             <Modal.Header className='bg-dark text-white' closeButton closeVariant='white'>
-                                <Modal.Title>Editar Categoria</Modal.Title>
+                                <Modal.Title>Editar Subcategoria</Modal.Title>
                             </Modal.Header>
                             <form onSubmit={this.submitForm}>
-                            <Modal.Body>
+                                <Modal.Body>
                                     <div className="mb-3">
-                                        <label htmlFor="editNomeCategoria" className="form-label">Nome da Categoria *</label>
+                                        <label htmlFor="editNomeSubcategoria" className="form-label">Nome da Subcategoria *</label>
                                         <input 
                                             type="text" 
                                             className="form-control" 
-                                            id="editNomeCategoria"
-                                            name="nomeCategoria"
-                                            placeholder="Digite o nome da categoria..."
-                                            value={this.state.nomeCategoria}
+                                            id="editNomeSubcategoria"
+                                            name="nomeSubcategoria"
+                                            placeholder="Digite o nome da subcategoria..."
+                                            value={this.state.nomeSubcategoria}
                                             onChange={this.handleChange}
                                             maxLength="50"
                                             required
@@ -491,25 +622,44 @@ class Categoria extends Component {
                                         <small className="form-text text-muted">Máximo 50 caracteres</small>
                                     </div>
                                     <div className="mb-3">
-                                        <label htmlFor="editDescricaoCategoria" className="form-label">Descrição *</label>
+                                        <label htmlFor="editDescricaoSubcategoria" className="form-label">Descrição *</label>
                                         <textarea 
                                             className="form-control" 
-                                            id="editDescricaoCategoria"
-                                            name="descricaoCategoria"
-                                            placeholder="Digite a descrição da categoria..."
-                                            value={this.state.descricaoCategoria}
+                                            id="editDescricaoSubcategoria"
+                                            name="descricaoSubcategoria"
+                                            placeholder="Digite a descrição da subcategoria..."
+                                            value={this.state.descricaoSubcategoria}
                                             onChange={this.handleChange}
                                             rows="4"
                                             required
                                         />
                                     </div>
-                            </Modal.Body>
-                            <Modal.Footer>
-                                <Button variant="secondary" onClick={() => this.closeModal('Edit')}>
+                                    <div className="mb-3">
+                                        <label htmlFor="editCategoria" className="form-label">Categoria *</label>
+                                        <Select
+                                            className={`basic-single ${this.state.isCategoriaInvalid ? 'is-invalid' : ''}`}
+                                            classNamePrefix="select"
+                                            isClearable={false}
+                                            isSearchable={true}
+                                            name="selectCategoria"
+                                            options={this.state.optionsCategorias}
+                                            noOptionsMessage={() => "Não há categorias cadastradas"}
+                                            placeholder="Selecione uma categoria..."
+                                            value={this.state.selectedCategoria}
+                                            onChange={this.handleCategoriaChange}
+                                            required
+                                        />
+                                        {this.state.isCategoriaInvalid && (
+                                            <div className="invalid-feedback d-block">Por favor, selecione uma categoria.</div>
+                                        )}
+                                    </div>
+                                </Modal.Body>
+                                <Modal.Footer>
+                                    <Button variant="secondary" onClick={() => this.closeModal('Edit')}>
                                         Cancelar
-                                </Button>
-                                <button type='submit' className="btn btn-primary">Salvar</button>
-                            </Modal.Footer>
+                                    </Button>
+                                    <button type='submit' className="btn btn-primary">Salvar</button>
+                                </Modal.Footer>
                             </form>
                         </Modal>
                     )}
@@ -519,19 +669,19 @@ class Categoria extends Component {
                     {this.state.showModalCreate && (
                         <Modal show={this.state.showModalCreate} onHide={() => this.closeModal('Create')} centered size='lg'>
                             <Modal.Header className='bg-dark text-white' closeButton closeVariant='white'>
-                                <Modal.Title>Nova Categoria</Modal.Title>
+                                <Modal.Title>Nova Subcategoria</Modal.Title>
                             </Modal.Header>
                             <form onSubmit={this.submitForm}>
                                 <Modal.Body>
                                     <div className="mb-3">
-                                        <label htmlFor="createNomeCategoria" className="form-label">Nome da Categoria *</label>
+                                        <label htmlFor="createNomeSubcategoria" className="form-label">Nome da Subcategoria *</label>
                                         <input 
                                             type="text" 
                                             className="form-control" 
-                                            id="createNomeCategoria"
-                                            name="nomeCategoria"
-                                            placeholder="Digite o nome da categoria..."
-                                            value={this.state.nomeCategoria}
+                                            id="createNomeSubcategoria"
+                                            name="nomeSubcategoria"
+                                            placeholder="Digite o nome da subcategoria..."
+                                            value={this.state.nomeSubcategoria}
                                             onChange={this.handleChange}
                                             maxLength="50"
                                             required
@@ -539,17 +689,36 @@ class Categoria extends Component {
                                         <small className="form-text text-muted">Máximo 50 caracteres</small>
                                     </div>
                                     <div className="mb-3">
-                                        <label htmlFor="createDescricaoCategoria" className="form-label">Descrição *</label>
+                                        <label htmlFor="createDescricaoSubcategoria" className="form-label">Descrição *</label>
                                         <textarea 
                                             className="form-control" 
-                                            id="createDescricaoCategoria"
-                                            name="descricaoCategoria"
-                                            placeholder="Digite a descrição da categoria..."
-                                            value={this.state.descricaoCategoria}
+                                            id="createDescricaoSubcategoria"
+                                            name="descricaoSubcategoria"
+                                            placeholder="Digite a descrição da subcategoria..."
+                                            value={this.state.descricaoSubcategoria}
                                             onChange={this.handleChange}
                                             rows="4"
                                             required
                                         />
+                                    </div>
+                                    <div className="mb-3">
+                                        <label htmlFor="createCategoria" className="form-label">Categoria *</label>
+                                        <Select
+                                            className={`basic-single ${this.state.isCategoriaInvalid ? 'is-invalid' : ''}`}
+                                            classNamePrefix="select"
+                                            isClearable={false}
+                                            isSearchable={true}
+                                            name="selectCategoria"
+                                            options={this.state.optionsCategorias}
+                                            noOptionsMessage={() => "Não há categorias cadastradas"}
+                                            placeholder="Selecione uma categoria..."
+                                            value={this.state.selectedCategoria}
+                                            onChange={this.handleCategoriaChange}
+                                            required
+                                        />
+                                        {this.state.isCategoriaInvalid && (
+                                            <div className="invalid-feedback d-block">Por favor, selecione uma categoria.</div>
+                                        )}
                                     </div>
                                 </Modal.Body>
                                 <Modal.Footer>
@@ -568,5 +737,5 @@ class Categoria extends Component {
   }
 }
 
-export default withNavigate(Categoria);
+export default withNavigate(Subcategoria);
 
