@@ -7,6 +7,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.io.Serializable;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
 @Entity
@@ -39,6 +41,14 @@ public class TCC implements Serializable {
 
     @Column
     private String resumo;
+
+    @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @JoinTable(
+        name = "palavra_TCC",
+        joinColumns = @JoinColumn(name = "tcc_id"),
+        inverseJoinColumns = @JoinColumn(name = "palavra_chave_id")
+    )
+    private Set<PalavraChave> palavrasChave = new HashSet<>();
 
     public TCC(String titulo, Aluno aluno, Orientador orientador, Curso curso, Subcategoria subcategoria, String resumo){
         this.titulo = titulo;

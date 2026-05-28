@@ -17,8 +17,14 @@ public class AlunoDTO {
     private String telefone;
     private String email;
     private String matricula;
+    private UUID turmaId;
+    private String turmaNome;
 
     public AlunoDTO(Aluno entity){
         BeanUtils.copyProperties(entity, this);
+        if (entity.getTurma() != null) {
+            this.turmaId = entity.getTurma().getId();
+            this.turmaNome = entity.getTurma().getNome();
+        }
     }
 }

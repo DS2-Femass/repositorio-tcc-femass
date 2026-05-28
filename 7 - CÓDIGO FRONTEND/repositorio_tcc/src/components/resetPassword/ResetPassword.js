@@ -135,7 +135,7 @@ class ResetPassword extends Component {
 
     componentDidMount() {
         const queryParams = new URLSearchParams(this.props.location.search);
-        this.setState({token: queryParams.get('token'), email: queryParams.get('email')});
+        this.setState({token: queryParams.get('token'), email: queryParams.get('toemail')});
     }
   
     render() {

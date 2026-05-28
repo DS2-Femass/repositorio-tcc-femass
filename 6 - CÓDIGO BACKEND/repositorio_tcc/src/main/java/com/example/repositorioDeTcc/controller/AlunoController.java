@@ -37,6 +37,12 @@ public class AlunoController {
         return ResponseEntity.ok().body(result);
     }
 
+    @GetMapping(value = "/turma/{turmaId}")
+    public ResponseEntity<List<AlunoMinDTO>> findByTurma(@PathVariable UUID turmaId){
+        List<AlunoMinDTO> result = service.findByTurmaId(turmaId);
+        return ResponseEntity.ok().body(result);
+    }
+
     @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<AlunoDTO> create(@RequestBody AlunoDTO aluno){
 
@@ -61,7 +67,8 @@ public class AlunoController {
 
     @PostMapping(value = "/import", consumes = {"multipart/form-data"})
     public ResponseEntity<Integer> importAlunos(
-            @RequestPart("file") MultipartFile file
+            @RequestPart("file") MultipartFile file,
+            @RequestParam(required = false) UUID turmaId
     ) {
         try {
             if (file.isEmpty()) {
@@ -69,11 +76,20 @@ public class AlunoController {
             }
 
             String contentType = file.getContentType();
-            if (contentType == null || !contentType.equals("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")) {
+            String originalFilename = file.getOriginalFilename() != null ? file.getOriginalFilename().toLowerCase() : "";
+            boolean isExcel = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet".equals(contentType)
+                    || "application/vnd.ms-excel".equals(contentType)
+                    || "application/excel".equals(contentType)
+                    || originalFilename.endsWith(".xls")
+                    || originalFilename.endsWith(".xlsx");
+            boolean isCsv = "text/csv".equals(contentType)
+                    || "application/csv".equals(contentType)
+                    || originalFilename.endsWith(".csv");
+            if (contentType == null || (!isExcel && !isCsv)) {
                 return ResponseEntity.badRequest().body(-2); // Tipo de arquivo inválido
             }
 
-            int alunosImportados = service.importAlunos(file);
+            int alunosImportados = service.importAlunos(file, turmaId);
             return ResponseEntity.ok().body(alunosImportados);
         } catch (IOException e) {
             // Log do erro

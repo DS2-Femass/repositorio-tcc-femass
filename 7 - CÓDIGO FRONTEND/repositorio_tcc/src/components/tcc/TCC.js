@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import Navbar from '../navbar/Navbar';
 import '../../assets/css/meutcc.css';
 import Select from 'react-select'
+import CreatableSelect from 'react-select/creatable'
 import { Button, Modal } from 'react-bootstrap';
 import { ToastContainer, toast } from 'react-toastify';
 import DataTable from 'react-data-table-component';
@@ -11,6 +12,8 @@ import { TCCService } from '../../service/TCCService';
 import { AlunoService } from '../../service/AlunoService';
 import { OrientadorService } from '../../service/OrientadorService';
 import { CursoService } from '../../service/CursoService';
+import { PalavraChaveService } from '../../service/PalavraChaveService';
+import { SubcategoriaService } from '../../service/SubcategoriaService';
 import { Link } from 'react-router-dom'
 
 function withNavigate(Component) {
@@ -30,12 +33,16 @@ class TCC extends Component {
         optionsAlunos: [],
         optionsOrientadores: [],
         optionsCursos: [],
+        optionsPalavrasChave: [],
+        optionsSubcategorias: [],
         isCursoInvalid: false,
         selectedCurso: null,
         isAlunoInvalid: false,
         selectedAluno: null,
         isOrientadorInvalid: false,
         selectedOrientador: null,
+        selectedPalavrasChave: [],
+        selectedSubcategoria: null,
         resumo: '',
         tituloTcc: '',
         toDeleteItem: null,
@@ -46,13 +53,16 @@ class TCC extends Component {
         toEditItem: null,
         filterTitulo: '',
         filterAluno: '',
-        filterOrientador: ''
+        filterOrientador: '',
+        filterPalavraChave: ''
     }
 
     tccService = new TCCService();
     alunoService = new AlunoService();
     orientadorService = new OrientadorService();
     cursoService = new CursoService();
+    palavraChaveService = new PalavraChaveService();
+    subcategoriaService = new SubcategoriaService();
 
     columns = [
         {
@@ -116,11 +126,13 @@ class TCC extends Component {
     applyFilters = () => {
         this.setState((prevState) => ({
             filteredItems: prevState.tccs.filter((tcc) => {
-                return (
-                    (prevState.filterTitulo === '' || tcc.titulo.toLowerCase().includes(prevState.filterTitulo.toLowerCase())) &&
-                    (prevState.filterAluno === '' || tcc.nomeCompletoAluno.toLowerCase().includes(prevState.filterAluno.toLowerCase())) &&
-                    (prevState.filterOrientador === '' || tcc.nomeCompletoOrientador.toLowerCase().includes(prevState.filterOrientador.toLowerCase()))
-                );
+                const matchesTitulo = prevState.filterTitulo === '' || tcc.titulo.toLowerCase().includes(prevState.filterTitulo.toLowerCase());
+                const matchesAluno = prevState.filterAluno === '' || tcc.nomeCompletoAluno.toLowerCase().includes(prevState.filterAluno.toLowerCase());
+                const matchesOrientador = prevState.filterOrientador === '' || tcc.nomeCompletoOrientador.toLowerCase().includes(prevState.filterOrientador.toLowerCase());
+                const matchesPalavraChave = prevState.filterPalavraChave === '' || 
+                    (tcc.palavrasChave && tcc.palavrasChave.some(p => p.nome.toLowerCase().includes(prevState.filterPalavraChave.toLowerCase())));
+                
+                return matchesTitulo && matchesAluno && matchesOrientador && matchesPalavraChave;
             })
         }));
     }
@@ -130,7 +142,7 @@ class TCC extends Component {
     };
 
     clearFilters = () => {
-        this.setState({filterTitulo: '', filterAluno: '', filterOrientador: ''}, this.applyFilters);
+        this.setState({filterTitulo: '', filterAluno: '', filterOrientador: '', filterPalavraChave: ''}, this.applyFilters);
     }
 
     handleChange = (event) => {
@@ -166,6 +178,9 @@ class TCC extends Component {
                     label: aluno.nomeCompleto
                 }));
                 this.setState({ optionsAlunos });
+            })
+            .catch((error) => {
+                console.error('Erro ao carregar alunos:', error);
             });
     }
 
@@ -178,6 +193,9 @@ class TCC extends Component {
                     }));
                     this.setState({ optionsOrientadores });
             })
+            .catch((error) => {
+                console.error('Erro ao carregar orientadores:', error);
+            })
     }
 
     fillOptionsCursos = () => {
@@ -189,12 +207,56 @@ class TCC extends Component {
                     }));
                     this.setState({ optionsCursos });
             })
+            .catch((error) => {
+                console.error('Erro ao carregar cursos:', error);
+                toast.error('Erro ao carregar cursos', {
+                    position: "top-right",
+                    autoClose: 2000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                    progress: undefined,
+                });
+            })
+    }
+
+    fillOptionsPalavrasChave = () => {
+        this.palavraChaveService.findAllActive()
+            .then((response) => {
+                const optionsPalavrasChave = response.data.map(palavra => ({
+                    value: palavra.id,
+                    label: palavra.nome
+                }));
+                this.setState({ optionsPalavrasChave });
+            })
+            .catch((error) => {
+                console.error('Erro ao carregar palavras-chave:', error);
+                this.setState({ optionsPalavrasChave: [] });
+            });
+    }
+
+    fillOptionsSubcategorias = (cursoId) => {
+        if (cursoId) {
+            this.subcategoriaService.listAll()
+                .then((response) => {
+                    const optionsSubcategorias = response.data
+                        .filter(sub => sub.idCategoria !== null)
+                        .map(sub => ({
+                            value: sub.id,
+                            label: sub.nomeSubcategoria
+                        }));
+                    this.setState({ optionsSubcategorias });
+                });
+        }
     }
 
     beginInsertion = () => {
         this.fillOptionsAlunos();
         this.fillOptionsOrientadores();
         this.fillOptionsCursos();
+        this.fillOptionsPalavrasChave();
+        this.fillOptionsSubcategorias();
     }
 
     validateForm = () => {
@@ -215,6 +277,8 @@ class TCC extends Component {
             selectedAluno: null,
             selectedCurso: null,
             selectedOrientador: null,
+            selectedPalavrasChave: [],
+            selectedSubcategoria: null,
             resumo: '',
         });
     }
@@ -235,11 +299,44 @@ class TCC extends Component {
             data.resumo = this.state.resumo;
         }
 
+        if(this.state.selectedSubcategoria) {
+            data.idSubcategoria = this.state.selectedSubcategoria.value;
+        }
+
         var request = null;
         if(!this.state.toEditItem){
+            // Para criação, envia palavras-chave como objetos com id ou nome
+            if(this.state.selectedPalavrasChave && this.state.selectedPalavrasChave.length > 0) {
+                data.palavrasChave = this.state.selectedPalavrasChave.map(p => {
+                    // Se for uma palavra-chave nova (sem ID), envia o nome
+                    if(p.isNew) {
+                        return { nome: p.label };
+                    }
+                    // Se for uma palavra-chave existente, envia o ID
+                    return { id: p.value };
+                });
+            }
             request = this.tccService.insert(data);
         } else {
+            // Para edição, envia IDs das palavras-chave existentes E novas palavras-chave
             data.id = this.state.toEditItem.id;
+            if(this.state.selectedPalavrasChave && this.state.selectedPalavrasChave.length > 0) {
+                // IDs das palavras existentes
+                data.idPalavrasChave = this.state.selectedPalavrasChave
+                    .filter(p => !p.isNew)
+                    .map(p => p.value);
+                
+                // Novas palavras-chave
+                const novasPalavras = this.state.selectedPalavrasChave
+                    .filter(p => p.isNew)
+                    .map(p => ({ nome: p.label }));
+                
+                if(novasPalavras.length > 0) {
+                    data.palavrasChave = novasPalavras;
+                }
+            } else {
+                data.idPalavrasChave = [];
+            }
             request = this.tccService.update(this.state.toEditItem.id, data);
         }
 
@@ -348,6 +445,8 @@ class TCC extends Component {
     beginEdit = (tcc) => { 
 
         this.fillOptionsOrientadores();
+        this.fillOptionsPalavrasChave();
+        this.fillOptionsSubcategorias();
 
         this.tccService.findById(tcc.id)
             .then((response) => {
@@ -358,6 +457,15 @@ class TCC extends Component {
                 }
             }).then((data) => { 
                 if (data.resumo === null) data.resumo = '';
+                
+                // Prepara palavras-chave selecionadas
+                const palavrasChave = data.palavrasChave ? data.palavrasChave.map(p => ({
+                    value: p.id,
+                    label: p.nome
+                })) : [];
+
+                const subcategoria = data.idSubcategoria ? { value: data.idSubcategoria, label: 'Subcategoria' } : null;
+
                 this.setState({ 
                     toEditItem: data,
                     showModalEdit: true,
@@ -365,7 +473,10 @@ class TCC extends Component {
                     resumo: data.resumo,
                     selectedCurso: { value: data.idCurso, label: data.nomeCurso },
                     selectedAluno: { value: data.idAluno, label: data.nomeCompletoAluno },
-                    selectedOrientador: { value: data.idOrientador, label: data.nomeCompletoOrientador } });
+                    selectedOrientador: { value: data.idOrientador, label: data.nomeCompletoOrientador },
+                    selectedPalavrasChave: palavrasChave,
+                    selectedSubcategoria: subcategoria
+                });
             })
             .catch((error) => {
             });
@@ -502,6 +613,22 @@ class TCC extends Component {
                                         </div>
                                     </div>
                                 </div>
+                                <div className="row g-3 mt-1">
+                                    <div className="col-md-4">
+                                        <div className="form-floating">
+                                            <input
+                                                id="filterPalavraChave"
+                                                type="text"
+                                                className="form-control"
+                                                name="filterPalavraChave"
+                                                placeholder="Buscar palavra-chave..."
+                                                value={this.state.filterPalavraChave}
+                                                onChange={this.handleFilterChange}
+                                            />
+                                            <label htmlFor="filterPalavraChave">Palavra-Chave</label>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </motion.div>
                     </div>
@@ -625,12 +752,54 @@ class TCC extends Component {
                                                         />
                                                         {this.state.isOrientadorInvalid && <div className="invalid-feedback">Por favor, selecione um orientador.</div>}
                                                     </div>
+                                                    <div className="col-12">
+                                                        <label htmlFor="inputName" className="col-12 col-form-label fw-bold">Subcategoria</label>
+                                                        <Select
+                                                            className="basic-single"
+                                                            classNamePrefix="select"
+                                                            isClearable={true}
+                                                            isSearchable={true}
+                                                            name="selectSubcategoria"
+                                                            options={this.state.optionsSubcategorias}
+                                                            noOptionsMessage={() => "Não há subcategorias cadastradas"}
+                                                            placeholder="Selecione.."
+                                                            value={this.state.selectedSubcategoria}
+                                                            onChange={(selectedOption) => this.setState({ selectedSubcategoria: selectedOption })}
+                                                        />
+                                                    </div>
+                                                    <div className="col-12">
+                                                        <label htmlFor="inputName" className="col-12 col-form-label fw-bold">Palavras-Chave</label>
+                                                        <CreatableSelect
+                                                            className="basic-multi-select"
+                                                            classNamePrefix="select"
+                                                            isMulti={true}
+                                                            isClearable={true}
+                                                            isSearchable={true}
+                                                            name="selectPalavrasChave"
+                                                            options={this.state.optionsPalavrasChave}
+                                                            noOptionsMessage={() => "Digite para criar uma nova palavra-chave..."}
+                                                            placeholder="Cadastre ou digite para buscar..."
+                                                            value={this.state.selectedPalavrasChave}
+                                                            onChange={(selectedOptions) => this.setState({ selectedPalavrasChave: selectedOptions || [] })}
+                                                            onCreateOption={(inputValue) => {
+                                                                const newOption = {
+                                                                    value: inputValue.toLowerCase().replace(/\s+/g, '-'),
+                                                                    label: inputValue,
+                                                                    isNew: true
+                                                                };
+                                                                this.setState(prevState => ({
+                                                                    selectedPalavrasChave: [...(prevState.selectedPalavrasChave || []), newOption]
+                                                                }));
+                                                            }}
+                                                        />
+                                                        <small className="form-text text-muted">Digite e pressione Enter para criar uma nova palavra-chave</small>
+                                                    </div>
                                                 </div>
                                         </div>
                                     </div>
                                     <div className="modal-footer">
                                         <button type="button" id="btnCloseModal" className="btn btn-secondary" data-bs-dismiss="modal" onClick={this.clearState}>Fechar</button>
-                                        <button type="submit" className="btn btn-primary">Salvar</button>
+                                        <button type="submit" className="btn btn-primary">Criar</button>
                                     </div>
                                 </form>
                             </div>
@@ -685,6 +854,18 @@ class TCC extends Component {
                                         <h5>Curso:</h5>
                                         <p>{this.state.toViewItem.nomeCurso}</p>
                                     </div>
+                                    {this.state.toViewItem.idSubcategoria && (
+                                        <div>
+                                            <h5>Subcategoria:</h5>
+                                            <p>{this.state.toViewItem.idSubcategoria}</p>
+                                        </div>
+                                    )}
+                                    {this.state.toViewItem.palavrasChave && this.state.toViewItem.palavrasChave.length > 0 && (
+                                        <div>
+                                            <h5>Palavras-Chave:</h5>
+                                            <p>{this.state.toViewItem.palavrasChave.map(p => p.nome).join(', ')}</p>
+                                        </div>
+                                    )}
                                     </>
                                 }
                             </Modal.Body>
@@ -747,7 +928,6 @@ class TCC extends Component {
                                                             className={`basic-single ${this.state.isOrientadorInvalid ? 'is-invalid' : ''}`}
                                                             classNamePrefix="select"
                                                             defaultValue={defaultSelectOption}
-                                                            // isLoading={isLoading}
                                                             isClearable={true}
                                                             isSearchable={true}
                                                             name="selectOrientador"
@@ -757,6 +937,48 @@ class TCC extends Component {
                                                             onChange={(selectedOption) => this.setState({ selectedOrientador: selectedOption, isOrientadorInvalid: !selectedOption })}
                                                         />
                                                         {this.state.isOrientadorInvalid && <div className="invalid-feedback">Por favor, selecione um orientador.</div>}
+                                                    </div>
+                                                    <div className="col-12">
+                                                        <label htmlFor="inputName" className="col-12 col-form-label fw-bold">Subcategoria</label>
+                                                        <Select
+                                                            className="basic-single"
+                                                            classNamePrefix="select"
+                                                            isClearable={true}
+                                                            isSearchable={true}
+                                                            name="selectSubcategoria"
+                                                            options={this.state.optionsSubcategorias}
+                                                            noOptionsMessage={() => "Não há subcategorias cadastradas"}
+                                                            placeholder="Selecione.."
+                                                            value={this.state.selectedSubcategoria}
+                                                            onChange={(selectedOption) => this.setState({ selectedSubcategoria: selectedOption })}
+                                                        />
+                                                    </div>
+                                                    <div className="col-12">
+                                                        <label htmlFor="inputName" className="col-12 col-form-label fw-bold">Palavras-Chave</label>
+                                                        <CreatableSelect
+                                                            className="basic-multi-select"
+                                                            classNamePrefix="select"
+                                                            isMulti={true}
+                                                            isClearable={true}
+                                                            isSearchable={true}
+                                                            name="selectPalavrasChave"
+                                                            options={this.state.optionsPalavrasChave}
+                                                            noOptionsMessage={() => "Digite para criar uma nova palavra-chave..."}
+                                                            placeholder="Cadastre ou digite para buscar..."
+                                                            value={this.state.selectedPalavrasChave}
+                                                            onChange={(selectedOptions) => this.setState({ selectedPalavrasChave: selectedOptions || [] })}
+                                                            onCreateOption={(inputValue) => {
+                                                                const newOption = {
+                                                                    value: inputValue.toLowerCase().replace(/\s+/g, '-'),
+                                                                    label: inputValue,
+                                                                    isNew: true
+                                                                };
+                                                                this.setState(prevState => ({
+                                                                    selectedPalavrasChave: [...(prevState.selectedPalavrasChave || []), newOption]
+                                                                }));
+                                                            }}
+                                                        />
+                                                        <small className="form-text text-muted">Digite e pressione Enter para criar uma nova palavra-chave</small>
                                                     </div>
                                                 </div>
                                         </div>

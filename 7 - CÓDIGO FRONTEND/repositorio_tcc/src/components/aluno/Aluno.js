@@ -4,6 +4,7 @@ import { Button, Modal } from 'react-bootstrap';
 import { ToastContainer, toast } from 'react-toastify';
 import DataTable from 'react-data-table-component';
 import { AlunoService } from '../../service/AlunoService';
+import { TurmaService } from '../../service/TurmaService';
 import { TranslationService } from '../../service/TranslationService';
 
 class Aluno extends Component {
@@ -11,6 +12,7 @@ class Aluno extends Component {
     state = {
         users: [],
         filteredData: [],
+        turmas: [],
         checkboxChangePassword: true,
         checkboxNotifyEmail: true,
         completeName: '',
@@ -30,7 +32,9 @@ class Aluno extends Component {
         nomeCompleto: null,
         telefone: null,
         matricula: null,
-        uploadAlunos: null
+        turmaId: '',
+        uploadAlunos: null,
+        uploadTurmaId: ''
     }
 
     columns = [
@@ -69,6 +73,7 @@ class Aluno extends Component {
     };
 
     alunoService = new AlunoService();
+    turmaService = new TurmaService();
 
     handleCheckboxChange = (event) => {
         this.setState({ [event.target.name]: event.target.checked });
@@ -103,8 +108,7 @@ class Aluno extends Component {
     }
 
     handleChange = (event) => {
-        if(event.target.name.startsWith('upload')) {
-
+        if(event.target.type === 'file') {
             this.setState({ [event.target.name]: null });
             if(!this.validateFile(event.target.files[0])){
                 event.target.focus();
@@ -169,15 +173,15 @@ class Aluno extends Component {
                 } else{
                     throw new Error('Erro na requisição: ' + response.status);
                 }
-            }).then((data) => { 
+            }).then((data) => {
                 if (data.resumo === null) data.resumo = '';
-                this.setState({ 
+                this.setState({
                     toEditItem: data,
                     showModalEdit: true,
                     nomeCompleto: data.nomeCompleto,
                     email: data.email,
                     telefone: data.telefone,
-                
+                    turmaId: data.turmaId || '',
                 });
             })
             .catch((error) => {
@@ -208,6 +212,9 @@ class Aluno extends Component {
             email: "",
             telefone: "",
             matricula: "",
+            turmaId: "",
+            uploadAlunos: null,
+            uploadTurmaId: "",
             toDeleteItem: null,
             toViewItem: null,
             toEditItem: null,
@@ -243,6 +250,7 @@ class Aluno extends Component {
             "matricula": this.state.matricula,
             "email": this.state.email,
             "telefone": this.state.telefone,
+            "turmaId": this.state.turmaId || null,
         };
 
         const token = sessionStorage.getItem('token');
@@ -391,8 +399,22 @@ class Aluno extends Component {
     uploadFile = (event) => {
         event.preventDefault();
 
+        if (!this.state.uploadTurmaId) {
+            toast.warning('Selecione uma turma antes de carregar o arquivo', {
+                position: "top-right",
+                autoClose: 2000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+            });
+            return;
+        }
+
         const formData = new FormData();
         formData.append('file', this.state.uploadAlunos);
+        formData.append('turmaId', this.state.uploadTurmaId);
 
         this.alunoService.importFromFile(formData)
             .then((response) => {
@@ -426,6 +448,9 @@ class Aluno extends Component {
 
     componentDidMount() {
         this.fillList();
+        this.turmaService.listAll()
+            .then(res => this.setState({ turmas: res.data }))
+            .catch(() => {});
     }
 
     render() {
@@ -518,12 +543,23 @@ class Aluno extends Component {
                                 <input type="email" className="form-control" id="email" name="email" required placeholder="email@email.com" onChange={this.handleChange}></input>
                                 </div>
                             </div>
-                            <div className="mb-4 row justify-content-center">
+                            <div className="mb-3 row justify-content-center">
                                 <div className='col-12'>
                                 <label htmlFor="password" className="col-form-label required">Telefone</label>
                                 <input type="text" className="form-control" id="telefone" name="telefone" required onChange={this.handleChange}></input>
                                 </div>
-                            </div>     
+                            </div>
+                            <div className="mb-4 row justify-content-center">
+                                <div className='col-12'>
+                                <label htmlFor="turmaId" className="col-form-label">Turma</label>
+                                <select className="form-select" id="turmaId" name="turmaId" onChange={this.handleChange} value={this.state.turmaId || ''}>
+                                    <option value="">-- Sem turma --</option>
+                                    {this.state.turmas.map(t => (
+                                        <option key={t.id} value={t.id}>{t.nome}</option>
+                                    ))}
+                                </select>
+                                </div>
+                            </div>
                     </Modal.Body>
                     <Modal.Footer>
                         <Button variant="secondary" onClick={() => this.closeModal('Registration')}>
@@ -573,6 +609,10 @@ class Aluno extends Component {
                                 <h5>Telefone:</h5>
                                 <p>{this.state.toViewItem.telefone}</p>
                             </div>
+                            <div>
+                                <h5>Turma:</h5>
+                                <p>{this.state.toViewItem.turmaNome || '-'}</p>
+                            </div>
                             </>
                     }
                     </Modal.Body>
@@ -605,6 +645,15 @@ class Aluno extends Component {
                                                 <label htmlFor="inputName" className="col-12 col-form-label fw-bold">Telefone</label>
                                                 <input type="text" className="form-control" name="telefone" onChange={this.handleChange} value={this.state.telefone}/>
                                             </div>
+                                            <div className="col-12">
+                                                <label className="col-12 col-form-label fw-bold">Turma</label>
+                                                <select className="form-select" name="turmaId" onChange={this.handleChange} value={this.state.turmaId || ''}>
+                                                    <option value="">-- Sem turma --</option>
+                                                    {this.state.turmas.map(t => (
+                                                        <option key={t.id} value={t.id}>{t.nome}</option>
+                                                    ))}
+                                                </select>
+                                            </div>
                                         </div>
                                 </div>
                             </div>
@@ -620,16 +669,40 @@ class Aluno extends Component {
                     </form>
                 </Modal>
 
-                <Modal show={this.state.showModalUpload} onHide={() => this.closeModal('Upload')} centered size='md'> 
+                <Modal show={this.state.showModalUpload} onHide={() => this.closeModal('Upload')} centered size='md'>
                     <Modal.Header closeButton className='bg-dark text-white' closeVariant='white'>
                         <Modal.Title>Importação de Alunos</Modal.Title>
                     </Modal.Header>
                     <form onSubmit={this.uploadFile}>
                     <Modal.Body>
-                            <div className="mb-3 row justify-content-center">  
+                            <div className="mb-3 row justify-content-center">
                                 <div className='col-12'>
-                                    <label htmlFor="upload-alunos" className='form-label'>Carregue o arquivo</label>
-                                    <input type="file" id="upload-alunos" className='form-control' name="uploadAlunos" accept=".csv,.xls,.xlsx" required onChange={this.handleChange}></input>
+                                    <label htmlFor="uploadTurmaId" className="col-form-label required">Turma</label>
+                                    <select
+                                        className="form-select"
+                                        id="uploadTurmaId"
+                                        name="uploadTurmaId"
+                                        required
+                                        value={this.state.uploadTurmaId}
+                                        onChange={this.handleChange}
+                                    >
+                                        <option value="">-- Selecione uma turma --</option>
+                                        {this.state.turmas.map(t => (
+                                            <option key={t.id} value={t.id}>{t.nome}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                            </div>
+                            <div className="mb-3 row justify-content-center">
+                                <div className='col-12'>
+                                    <label className="col-form-label required">Arquivo</label>
+                                    <div>
+                                        <input type="file" id="upload-alunos" style={{display: 'none'}} name="uploadAlunos" accept=".csv,.xls,.xlsx" required onChange={this.handleChange} />
+                                        <label htmlFor="upload-alunos" className="btn btn-outline-secondary">Selecionar arquivo</label>
+                                        <span className="ms-2">
+                                            {this.state.uploadAlunos ? this.state.uploadAlunos.name : "Nenhum arquivo selecionado"}
+                                        </span>
+                                    </div>
                                     <small className="form-text text-muted">Formatos aceitos: CSV, XLS, XLSX</small>
                                 </div>
                             </div>
@@ -638,7 +711,7 @@ class Aluno extends Component {
                         <Button variant="secondary" onClick={() => this.closeModal('Upload')}>
                             Cancelar
                         </Button>
-                        <Button variant="success" type='submit' disabled={!this.state.uploadAlunos}>
+                        <Button variant="success" type='submit' disabled={!this.state.uploadAlunos || !this.state.uploadTurmaId}>
                             Carregar
                         </Button>
                     </Modal.Footer>
