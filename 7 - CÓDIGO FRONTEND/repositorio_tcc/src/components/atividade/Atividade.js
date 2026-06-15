@@ -373,10 +373,17 @@ class Atividade extends Component {
                                                                         <td>{this.formatDate(item.dataEntrega)}</td>
                                                                         <td>{item.nomeAluno}</td>
                                                                         <td>
-                                                                            {item.dataRealizacao
+                                                                            {/* {item.dataRealizacao
                                                                                 ? <span className="badge bg-success">{this.formatDate(item.dataRealizacao)}</span>
                                                                                 : <span className="badge bg-secondary">Pendente</span>
-                                                                            }
+                                                                            } */}
+
+                                                                            {!item.dataRealizacao
+                                                                                ? <span className="badge bg-secondary">Pendente</span>
+                                                                                : new Date(item.dataRealizacao) <= new Date(item.dataEntrega)
+                                                                                    ? <span className="badge bg-success">{this.formatDate(item.dataRealizacao)}</span>
+                                                                                    : <span className="badge bg-danger">{this.formatDate(item.dataRealizacao)}</span>
+    }
                                                                         </td>
                                                                         <td>
                                                                             {item.nota !== null && item.nota !== undefined
