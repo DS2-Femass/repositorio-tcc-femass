@@ -27,6 +27,14 @@ spring:
     properties:
       show-sql: false
     open-in-view: false
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 50MB
+      max-request-size: 50MB
 
 frontend:
   url: ${FRONTEND_URL:http://localhost:3000}
+
+upload:
+  dir: ${UPLOAD_DIR:uploads/atividades}

@@ -109,6 +109,7 @@ class Login extends Component {
         if (response.ok && response.data.token) {
           // Armazene o token em localStorage ou sessionStorage
           sessionStorage.setItem('token', response.data.token);
+          if (response.data.role) { sessionStorage.setItem('role', response.data.role); }
           toast.success('Login realizado!', {
             position: "top-right",
             autoClose: 1000,
@@ -341,11 +342,21 @@ class Login extends Component {
           .then((response) => {
               if (response.status === 200) {
                   setTimeout(() => {
-                      this.setState({ box: 'firstAccess2' }); // ainda preciso implementar essa tela
+                      this.setState({ box: 'firstAccess2' });
                   }, 1000);
                   return;
+              } else if (response.status === 404) {
+                  toast.error('Aluno não encontrado no sistema.', {
+                      position: "top-right",
+                      autoClose: 3000,
+                      hideProgressBar: false,
+                      closeOnClick: true,
+                      pauseOnHover: true,
+                      draggable: true,
+                      progress: undefined,
+                  });
               } else {
-                  toast.error('Ocorreu um erro', {
+                  toast.error('Ocorreu um erro. Tente novamente.', {
                       position: "top-right",
                       autoClose: 2000,
                       hideProgressBar: false,
@@ -354,7 +365,6 @@ class Login extends Component {
                       draggable: true,
                       progress: undefined,
                   });
-                  throw new Error('Falha na requisição: ' + response.status);
               }
           })
           .catch(e => { console.error(e) });

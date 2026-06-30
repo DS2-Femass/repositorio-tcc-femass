@@ -5,6 +5,7 @@ import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.mail.MailException;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -40,10 +41,14 @@ public class MailService {
     }
 
 
+    private String baseUrl() {
+        return frontendUrl.endsWith("/") ? frontendUrl.substring(0, frontendUrl.length() - 1) : frontendUrl;
+    }
+
     @Async
     public void sendRecoverPassword(String person, String to, String token) {
         String subject = "Password reset";
-        String rota = frontendUrl + "/reset-password?token=" + token;
+        String rota = baseUrl() + "/reset-password?token=" + token;
         String htmlContent = String.format(
                 """
     <html>
@@ -110,15 +115,17 @@ public class MailService {
             helper.setText(htmlContent, true);
             helper.setFrom(sender);
             mailSender.send(message);
-        } catch (MessagingException e) {
-            System.err.println("Erro ao enviar e-mail: " + e.getMessage());
+            System.out.println("[MailService] E-mail de recuperação enviado para: " + to);
+        } catch (MessagingException | MailException e) {
+            System.err.println("[MailService] Erro ao enviar e-mail de recuperação para " + to + ": " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
     @Async
     public void sendWelcomeEmail(RegisterUserDTO registerUserDTO, String token) {
         String subject = "Bem vindo ao TCC Flow - Repositório de TCC da Femass";
-        String rota = frontendUrl + "/reset-password?token=" + token + "&toemail=" + registerUserDTO.email();
+        String rota = baseUrl() + "/reset-password?token=" + token + "&toemail=" + registerUserDTO.email();
         String htmlContent = String.format(
                 """
     <html>
@@ -185,8 +192,10 @@ public class MailService {
             helper.setText(htmlContent, true);
             helper.setFrom(sender);
             mailSender.send(message);
-        } catch (MessagingException e) {
-            System.err.println("Erro ao enviar e-mail: " + e.getMessage());
+            System.out.println("[MailService] E-mail de boas-vindas enviado para: " + registerUserDTO.email());
+        } catch (MessagingException | MailException e) {
+            System.err.println("[MailService] Erro ao enviar e-mail de boas-vindas para " + registerUserDTO.email() + ": " + e.getMessage());
+            e.printStackTrace();
         }
     }
     }

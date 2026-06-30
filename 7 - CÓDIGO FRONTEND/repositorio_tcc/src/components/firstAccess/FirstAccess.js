@@ -43,10 +43,10 @@ class FirstAccess extends Component {
             return;
         }
 
-        const url = window.server + "/auth/first-access-request";
+        const url = window.server + "/auth/first-access";
 
         const data = {
-            identifier: this.state.identifier
+            matriculaOuCpf: this.state.identifier
         };
 
         fetch(url, {
@@ -68,10 +68,20 @@ class FirstAccess extends Component {
                         progress: undefined,
                     });
                     setTimeout(() => {
-                        this.props.navigate('/');
+                        this.props.navigate('/login');
                     }, 2500);
+                } else if (response.status === 404) {
+                    toast.error('Aluno não encontrado no sistema.', {
+                        position: "top-right",
+                        autoClose: 3000,
+                        hideProgressBar: false,
+                        closeOnClick: true,
+                        pauseOnHover: true,
+                        draggable: true,
+                        progress: undefined,
+                    });
                 } else {
-                    toast.error('Erro ao enviar solicitação.', {
+                    toast.error('Ocorreu um erro. Tente novamente.', {
                         position: "top-right",
                         autoClose: 4000,
                         hideProgressBar: false,
@@ -83,7 +93,7 @@ class FirstAccess extends Component {
                 }
             })
             .catch(error => {
-                toast.error('Algo deu errado.', {
+                toast.error('Erro de servidor.', {
                     position: "top-right",
                     autoClose: 4000,
                     hideProgressBar: false,

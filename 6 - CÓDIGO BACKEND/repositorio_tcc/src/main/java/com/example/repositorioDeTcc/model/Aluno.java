@@ -1,9 +1,6 @@
 package com.example.repositorioDeTcc.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Inheritance;
-import jakarta.persistence.InheritanceType;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -14,6 +11,10 @@ import lombok.NoArgsConstructor;
 public class Aluno extends Pessoa{
 
     private String matricula;
+
+    @ManyToOne
+    @JoinColumn(name = "turma_id", referencedColumnName = "id")
+    private Turma turma;
 
     public Aluno(String nomeCompleto, String telefone, String email, String matricula){
         super(nomeCompleto, telefone, email);

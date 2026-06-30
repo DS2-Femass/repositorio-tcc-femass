@@ -6,6 +6,10 @@ export class AlunoService extends BaseService {
         super("/alunos");
     }
 
+    findByTurma(turmaId) {
+        return axiosInstance.get(`${this.url}/turma/${turmaId}`);
+    }
+
     importFromFile(file){
         return axiosInstance.post(`${this.url}/import`, file, {
             headers: {

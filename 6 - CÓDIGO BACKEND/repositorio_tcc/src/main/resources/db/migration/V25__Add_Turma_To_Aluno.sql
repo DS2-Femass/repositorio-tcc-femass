@@ -1,0 +1,6 @@
+ALTER TABLE aluno
+ADD COLUMN IF NOT EXISTS turma_id UUID;
+
+ALTER TABLE aluno
+ADD CONSTRAINT fk_aluno_turma
+FOREIGN KEY (turma_id) REFERENCES turma(id) ON DELETE SET NULL;

@@ -9,6 +9,7 @@ COPY src ./src
 
 RUN mvn package -DskipTests
 
+FROM amazoncorretto:21-alpine
 FROM eclipse-temurin:21-jdk-alpine
 
 EXPOSE 8080

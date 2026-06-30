@@ -5,15 +5,21 @@ export default class Navbar extends Component {
 
   logout = () => {
     sessionStorage.removeItem('token');
+    sessionStorage.removeItem('role');
+    sessionStorage.removeItem('mustChangePassword');
     window.location.href = '/login';
   }
 
   state = {
-    currentPageLink: 'home'
+    currentPageLink: 'home',
+    role: sessionStorage.getItem('role') || 'USER'
   }
 
   componentDidMount() {
-    this.setState({currentPageLink: window.location.pathname.split('/')[1]});
+    this.setState({
+      currentPageLink: window.location.pathname.split('/')[1],
+      role: sessionStorage.getItem('role') || 'USER'
+    });
   }
 
   render() {
@@ -54,6 +60,14 @@ export default class Navbar extends Component {
                   <li className="nav-item">
                     <Link to="/users" className={`nav-link ${this.state.currentPageLink === 'users' ? 'active' : ''}`}>Usuários</Link>
                   </li>
+                  <li className="nav-item">
+                    <Link to="/atividades" className={`nav-link ${this.state.currentPageLink === 'atividades' ? 'active' : ''}`}>Atividades</Link>
+                  </li>
+                  {(this.state.role === 'MODERATOR' || this.state.role === 'ADMIN') && (
+                    <li className="nav-item">
+                      <Link to="/turmas" className={`nav-link ${this.state.currentPageLink === 'turmas' ? 'active' : ''}`}>Turmas</Link>
+                    </li>
+                  )}
                 </ul>
               </div>
             </div>

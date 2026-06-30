@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls \"C:\\\\Users\\\\wagne\\\\OneDrive\\\\FeMASS\\\\2026\\\\04-DS2\\\\repositorio-tcc-femass\\\\6 - CÓDIGO BACKEND\\\\repositorio_tcc\\\\src\\\\main\\\\resources\\\\db\\\\migration\"\" 2>/dev/null || echo \"NOT FOUND \")",
+      "Bash(cmd /c \"dir /B \"\"C:\\\\Users\\\\wagne\\\\OneDrive\\\\FeMASS\\\\2026\\\\04-DS2\\\\repositorio-tcc-femass\\\\6 - CÓDIGO BACKEND\\\\repositorio_tcc\\\\src\\\\main\\\\resources\\\\db\\\\migration\"\"\")",
+      "Bash(cmd /c \"dir /B /S \"\"C:\\\\Users\\\\wagne\\\\OneDrive\\\\FeMASS\\\\2026\\\\04-DS2\\\\repositorio-tcc-femass\\\\6 - CÓDIGO BACKEND\\\\repositorio_tcc\\\\src\\\\main\\\\resources\"\"\")",
+      "Bash(cmd /c \"dir /B /S \"\"C:\\\\Users\\\\wagne\\\\OneDrive\\\\FeMASS\\\\2026\\\\04-DS2\\\\repositorio-tcc-femass\\\\6 - CÓDIGO BACKEND\\\\repositorio_tcc\\\\src\\\\main\\\\java\\\\com\\\\example\\\\repositorioDeTcc\\\\dto\"\"\")",
+      "Bash(cmd /c \"dir /B /A \"\"C:\\\\Users\\\\wagne\\\\OneDrive\\\\FeMASS\\\\2026\\\\04-DS2\\\\repositorio-tcc-femass\\\\6 - CÓDIGO BACKEND\\\\repositorio_tcc\\\\src\\\\main\\\\resources\"\"\")",
+      "Bash(cmd /c:*)",
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\wagne\\\\OneDrive\\\\FeMASS\\\\2026\\\\04-DS2\\\\repositorio-tcc-femass\\(2\\)\" -Directory)",
+      "Bash(Select-Object Name)",
+      "PowerShell(head *)"
+    ]
+  }
+}

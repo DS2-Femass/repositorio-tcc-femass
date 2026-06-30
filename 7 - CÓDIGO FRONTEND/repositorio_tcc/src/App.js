@@ -20,6 +20,8 @@ import MeuTCC from './components/tcc/MeuTCC.js';
 import Perfil from './components/perfil/Perfil.js';
 import FirstAccess from './components/firstAccess/FirstAccess.js';
 import PalavraChave from './components/palavraChave/PalavraChave.js';
+import Atividade from './components/atividade/Atividade.js';
+import Turma from './components/turma/Turma.js';
 
 class App extends React.Component{
   
@@ -59,9 +61,15 @@ class App extends React.Component{
     const ProtectedPerfil = (props) => (
       <ProtectedRoute component={() => <ChangePassword component={Perfil} {...props} />} />
     );
+    const ProtectedAtividade = (props) => (
+      <ProtectedRoute component={() => <ChangePassword component={Atividade} {...props} />} />
+    );
+    const ProtectedTurma = (props) => (
+      <ProtectedRoute component={() => <ChangePassword component={Turma} {...props} />} />
+    );
 
     return (
-      <BrowserRouter>
+      <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
         <div className="container-fluid">
         <PasswordModalProvider>
           <Routes>
@@ -79,6 +87,8 @@ class App extends React.Component{
             <Route exact path="/reset-password" element={<ParametrizedResetPasword />}></Route>
             <Route exact path="/perfil" element={<ProtectedPerfil />}></Route>
             <Route exact path="/first-access" element={<FirstAccess />}></Route>
+            <Route exact path="/atividades" element={<ProtectedAtividade />}></Route>
+            <Route exact path="/turmas" element={<ProtectedTurma />}></Route>
           </Routes>
           <PasswordChangeModal />
         </PasswordModalProvider>

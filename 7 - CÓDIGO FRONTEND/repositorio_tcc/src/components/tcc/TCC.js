@@ -136,9 +136,8 @@ class TCC extends Component {
                 const matchesOrientador = prevState.filterOrientador === '' || tcc.nomeCompletoOrientador.toLowerCase().includes(prevState.filterOrientador.toLowerCase());
                 const matchesPalavraChave = prevState.filterPalavraChave === '' || 
                     (tcc.palavrasChave && tcc.palavrasChave.some(p => p.nome.toLowerCase().includes(prevState.filterPalavraChave.toLowerCase())));
-                const matchesCurso = !prevState.filterCurso || (tcc.idCurso && tcc.idCurso === prevState.filterCurso.value);
                 
-                return matchesTitulo && matchesAluno && matchesOrientador && matchesPalavraChave && matchesCurso;
+                return matchesTitulo && matchesAluno && matchesOrientador && matchesPalavraChave;
             })
         }));
     }
@@ -148,6 +147,7 @@ class TCC extends Component {
     };
 
     clearFilters = () => {
+        
         this.setState({filterTitulo: '', filterAluno: '', filterOrientador: '', filterPalavraChave: '', filterCurso: null}, this.applyFilters);
     }
 
@@ -249,54 +249,47 @@ class TCC extends Component {
                 this.setState({ optionsPalavrasChave });
             })
             .catch((error) => {
+                console.error('Erro ao carregar cursos:', error);
+                toast.error('Erro ao carregar cursos', {
+                    position: "top-right",
+                    autoClose: 2000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                    progress: undefined,
+                });
+            })
+    }
+
+    fillOptionsPalavrasChave = () => {
+        this.palavraChaveService.findAllActive()
+            .then((response) => {
+                const optionsPalavrasChave = response.data.map(palavra => ({
+                    value: palavra.id,
+                    label: palavra.nome
+                }));
+                this.setState({ optionsPalavrasChave });
+            })
+            .catch((error) => {
                 console.error('Erro ao carregar palavras-chave:', error);
                 this.setState({ optionsPalavrasChave: [] });
             });
     }
 
-    fillOptionsCategorias = () => {
-        this.categoriaService.listAll()
-            .then((response) => {
-                const optionsCategorias = response.data.map(categoria => ({
-                    value: categoria.id,
-                    label: categoria.nomeCategoria
-                }));
-                this.setState({ optionsCategorias });
-            })
-            .catch((error) => {
-                console.error('Erro ao carregar categorias:', error);
-            });
-    }
-
-    fillOptionsSubcategorias = (idCategoria) => {
-        if (idCategoria) {
-            this.subcategoriaService.findAllByCategoria(idCategoria)
+    fillOptionsSubcategorias = (cursoId) => {
+        if (cursoId) {
+            this.subcategoriaService.listAll()
                 .then((response) => {
-                    const optionsSubcategorias = response.data.map(sub => ({
-                        value: sub.id,
-                        label: sub.nomeSubcategoria
-                    }));
+                    const optionsSubcategorias = response.data
+                        .filter(sub => sub.idCategoria !== null)
+                        .map(sub => ({
+                            value: sub.id,
+                            label: sub.nomeSubcategoria
+                        }));
                     this.setState({ optionsSubcategorias });
-                })
-                .catch((error) => {
-                    console.error('Erro ao carregar subcategorias:', error);
-                    this.setState({ optionsSubcategorias: [] });
                 });
-        } else {
-            this.setState({ optionsSubcategorias: [] });
         }
-    }
-
-    handleCategoriaChange = (selectedOption) => {
-        this.setState({ 
-            selectedCategoria: selectedOption,
-            selectedSubcategoria: null, // Limpa subcategoria quando categoria muda
-            optionsSubcategorias: [] // Limpa opções de subcategoria
-        }, () => {
-            if (selectedOption) {
-                this.fillOptionsSubcategorias(selectedOption.value);
-            }
-        });
     }
 
     beginInsertion = () => {
@@ -304,7 +297,7 @@ class TCC extends Component {
         this.fillOptionsOrientadores();
         this.fillOptionsCursos();
         this.fillOptionsPalavrasChave();
-        this.fillOptionsCategorias();
+        this.fillOptionsSubcategorias();
     }
 
     validateForm = () => {
@@ -326,7 +319,6 @@ class TCC extends Component {
             selectedCurso: null,
             selectedOrientador: null,
             selectedPalavrasChave: [],
-            selectedCategoria: null,
             selectedSubcategoria: null,
             resumo: '',
         });
@@ -494,7 +486,7 @@ class TCC extends Component {
     beginEdit = (tcc) => { 
         this.fillOptionsOrientadores();
         this.fillOptionsPalavrasChave();
-        this.fillOptionsCategorias();
+        this.fillOptionsSubcategorias();
 
         this.tccService.findById(tcc.id)
             .then((response) => {
@@ -512,87 +504,19 @@ class TCC extends Component {
                     label: p.nome
                 })) : [];
 
-                // Se tiver subcategoria, busca para obter a categoria
-                if (data.idSubcategoria) {
-                    this.subcategoriaService.findById(data.idSubcategoria)
-                        .then((subResponse) => {
-                            const subcategoria = subResponse.data;
-                            const categoria = { 
-                                value: subcategoria.idCategoria, 
-                                label: 'Categoria' // Vai buscar o nome depois se necessário
-                            };
-                            const subcategoriaOption = { 
-                                value: subcategoria.id, 
-                                label: subcategoria.nomeSubcategoria 
-                            };
+                const subcategoria = data.idSubcategoria ? { value: data.idSubcategoria, label: 'Subcategoria' } : null;
 
-                            // Busca o nome da categoria
-                            this.categoriaService.findById(subcategoria.idCategoria)
-                                .then((catResponse) => {
-                                    categoria.label = catResponse.data.nomeCategoria;
-                                    
-                                    // Carrega subcategorias da categoria
-                                    this.fillOptionsSubcategorias(subcategoria.idCategoria);
-                                    this.setState({ 
-                                        toEditItem: data,
-                                        showModalEdit: true,
-                                        tituloTcc: data.titulo,
-                                        resumo: data.resumo,
-                                        selectedCurso: { value: data.idCurso, label: data.nomeCurso },
-                                        selectedAluno: { value: data.idAluno, label: data.nomeCompletoAluno },
-                                        selectedOrientador: { value: data.idOrientador, label: data.nomeCompletoOrientador },
-                                        selectedPalavrasChave: palavrasChave,
-                                        selectedCategoria: categoria,
-                                        selectedSubcategoria: subcategoriaOption
-                                    });
-                                })
-                                .catch(() => {
-                                    // Se não conseguir buscar categoria, continua sem ela
-                                    this.fillOptionsSubcategorias(subcategoria.idCategoria);
-                                    this.setState({ 
-                                        toEditItem: data,
-                                        showModalEdit: true,
-                                        tituloTcc: data.titulo,
-                                        resumo: data.resumo,
-                                        selectedCurso: { value: data.idCurso, label: data.nomeCurso },
-                                        selectedAluno: { value: data.idAluno, label: data.nomeCompletoAluno },
-                                        selectedOrientador: { value: data.idOrientador, label: data.nomeCompletoOrientador },
-                                        selectedPalavrasChave: palavrasChave,
-                                        selectedCategoria: categoria,
-                                        selectedSubcategoria: subcategoriaOption
-                                    });
-                                });
-                        })
-                        .catch(() => {
-                            // Se não conseguir buscar subcategoria, continua sem ela
-                            this.setState({ 
-                                toEditItem: data,
-                                showModalEdit: true,
-                                tituloTcc: data.titulo,
-                                resumo: data.resumo,
-                                selectedCurso: { value: data.idCurso, label: data.nomeCurso },
-                                selectedAluno: { value: data.idAluno, label: data.nomeCompletoAluno },
-                                selectedOrientador: { value: data.idOrientador, label: data.nomeCompletoOrientador },
-                                selectedPalavrasChave: palavrasChave,
-                                selectedCategoria: null,
-                                selectedSubcategoria: null
-                            });
-                        });
-                } else {
-                    // Não tem subcategoria
-                    this.setState({ 
-                        toEditItem: data,
-                        showModalEdit: true,
-                        tituloTcc: data.titulo,
-                        resumo: data.resumo,
-                        selectedCurso: { value: data.idCurso, label: data.nomeCurso },
-                        selectedAluno: { value: data.idAluno, label: data.nomeCompletoAluno },
-                        selectedOrientador: { value: data.idOrientador, label: data.nomeCompletoOrientador },
-                        selectedPalavrasChave: palavrasChave,
-                        selectedCategoria: null,
-                        selectedSubcategoria: null
-                    });
-                }
+                this.setState({ 
+                    toEditItem: data,
+                    showModalEdit: true,
+                    tituloTcc: data.titulo,
+                    resumo: data.resumo,
+                    selectedCurso: { value: data.idCurso, label: data.nomeCurso },
+                    selectedAluno: { value: data.idAluno, label: data.nomeCompletoAluno },
+                    selectedOrientador: { value: data.idOrientador, label: data.nomeCompletoOrientador },
+                    selectedPalavrasChave: palavrasChave,
+                    selectedSubcategoria: subcategoria
+                });
             })
             .catch((error) => {
             });
@@ -783,6 +707,22 @@ class TCC extends Component {
                                         </div>
                                     </div>
                                 </div>
+                                <div className="row g-3 mt-1">
+                                    <div className="col-md-4">
+                                        <div className="form-floating">
+                                            <input
+                                                id="filterPalavraChave"
+                                                type="text"
+                                                className="form-control"
+                                                name="filterPalavraChave"
+                                                placeholder="Buscar palavra-chave..."
+                                                value={this.state.filterPalavraChave}
+                                                onChange={this.handleFilterChange}
+                                            />
+                                            <label htmlFor="filterPalavraChave">Palavra-Chave</label>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </motion.div>
                     </div>
@@ -907,32 +847,16 @@ class TCC extends Component {
                                                         {this.state.isOrientadorInvalid && <div className="invalid-feedback">Por favor, selecione um orientador.</div>}
                                                     </div>
                                                     <div className="col-12">
-                                                        <label htmlFor="inputName" className="col-12 col-form-label fw-bold">Categoria</label>
-                                                        <Select
-                                                            className="basic-single"
-                                                            classNamePrefix="select"
-                                                            isClearable={true}
-                                                            isSearchable={true}
-                                                            name="selectCategoria"
-                                                            options={this.state.optionsCategorias}
-                                                            noOptionsMessage={() => "Não há categorias cadastradas"}
-                                                            placeholder="Selecione uma categoria..."
-                                                            value={this.state.selectedCategoria}
-                                                            onChange={this.handleCategoriaChange}
-                                                        />
-                                                    </div>
-                                                    <div className="col-12">
                                                         <label htmlFor="inputName" className="col-12 col-form-label fw-bold">Subcategoria</label>
                                                         <Select
                                                             className="basic-single"
                                                             classNamePrefix="select"
                                                             isClearable={true}
                                                             isSearchable={true}
-                                                            isDisabled={!this.state.selectedCategoria}
                                                             name="selectSubcategoria"
                                                             options={this.state.optionsSubcategorias}
-                                                            noOptionsMessage={() => !this.state.selectedCategoria ? "Selecione uma categoria primeiro" : "Não há subcategorias cadastradas para esta categoria"}
-                                                            placeholder={!this.state.selectedCategoria ? "Selecione uma categoria primeiro..." : "Selecione uma subcategoria..."}
+                                                            noOptionsMessage={() => "Não há subcategorias cadastradas"}
+                                                            placeholder="Selecione.."
                                                             value={this.state.selectedSubcategoria}
                                                             onChange={(selectedOption) => this.setState({ selectedSubcategoria: selectedOption })}
                                                         />
@@ -1109,32 +1033,16 @@ class TCC extends Component {
                                                         {this.state.isOrientadorInvalid && <div className="invalid-feedback">Por favor, selecione um orientador.</div>}
                                                     </div>
                                                     <div className="col-12">
-                                                        <label htmlFor="inputName" className="col-12 col-form-label fw-bold">Categoria</label>
-                                                        <Select
-                                                            className="basic-single"
-                                                            classNamePrefix="select"
-                                                            isClearable={true}
-                                                            isSearchable={true}
-                                                            name="selectCategoria"
-                                                            options={this.state.optionsCategorias}
-                                                            noOptionsMessage={() => "Não há categorias cadastradas"}
-                                                            placeholder="Selecione uma categoria..."
-                                                            value={this.state.selectedCategoria}
-                                                            onChange={this.handleCategoriaChange}
-                                                        />
-                                                    </div>
-                                                    <div className="col-12">
                                                         <label htmlFor="inputName" className="col-12 col-form-label fw-bold">Subcategoria</label>
                                                         <Select
                                                             className="basic-single"
                                                             classNamePrefix="select"
                                                             isClearable={true}
                                                             isSearchable={true}
-                                                            isDisabled={!this.state.selectedCategoria}
                                                             name="selectSubcategoria"
                                                             options={this.state.optionsSubcategorias}
-                                                            noOptionsMessage={() => !this.state.selectedCategoria ? "Selecione uma categoria primeiro" : "Não há subcategorias cadastradas para esta categoria"}
-                                                            placeholder={!this.state.selectedCategoria ? "Selecione uma categoria primeiro..." : "Selecione uma subcategoria..."}
+                                                            noOptionsMessage={() => "Não há subcategorias cadastradas"}
+                                                            placeholder="Selecione.."
                                                             value={this.state.selectedSubcategoria}
                                                             onChange={(selectedOption) => this.setState({ selectedSubcategoria: selectedOption })}
                                                         />

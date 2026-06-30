@@ -72,9 +72,9 @@ public class AuthService {
             var token = tokenService.generateToken(user);
 
             if(user.getMustChangePassword()){
-                return ResponseEntity.ok(new LoginResponseMustChangeDTO(token, true));
+                return ResponseEntity.ok(new LoginResponseMustChangeDTO(token, true, user.getRole().name()));
             }
-            return ResponseEntity.ok(new LoginResponseDTO(token));
+            return ResponseEntity.ok(new LoginResponseDTO(token, user.getRole().name()));
 
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new LoginErroDTO("Authentication failed: " + e.getMessage()));
@@ -113,7 +113,7 @@ public class AuthService {
         user.setMustChangePassword(false);
         userRepository.save(user);
         var token = tokenService.generateToken(user);
-        return ResponseEntity.ok(new LoginResponseDTO(token));
+        return ResponseEntity.ok(new LoginResponseDTO(token, user.getRole().name()));
 
     }
 
@@ -147,7 +147,7 @@ public class AuthService {
             user.setMustChangePassword(false);
             userRepository.save(user);
             token = tokenService.generateToken(user);
-            return ResponseEntity.ok(new LoginResponseDTO(token));
+            return ResponseEntity.ok(new LoginResponseDTO(token, user.getRole().name()));
         }else {
             throw new IllegalStateException("User not found");
         }
@@ -163,15 +163,29 @@ public class AuthService {
                 .map(aluno -> (Pessoa) aluno)
                 .or(() -> orientadorOpt.map(orientador -> (Pessoa) orientador));
 
-        pessoaOpt.ifPresent(pessoa -> {
-            // Se já possui usuário, não faz nada
-            if (pessoa.getUser() != null) {
-                return;
-            }
+        if (pessoaOpt.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new LoginErroDTO("Aluno não encontrado no sistema."));
+        }
 
+        pessoaOpt.ifPresent(pessoa -> {
             String matricula = alunoOpt.map(Aluno::getMatricula).orElse(null);
             String email = pessoa.getEmail();
             String nomeCompleto = pessoa.getNomeCompleto();
+
+            User user = pessoa.getUser();
+
+            if (user != null) {
+                // Já tem conta mas ainda não definiu senha: reenviar e-mail
+                if (Boolean.TRUE.equals(user.getMustChangePassword())) {
+                    String token = tokenService.generateSingleToken(user);
+                    mailService.sendWelcomeEmail(
+                            new RegisterUserDTO(nomeCompleto, email, matricula, Role.USER, true),
+                            token
+                    );
+                }
+                return;
+            }
 
             String senhaAleatoria = UUID.randomUUID().toString();
 
@@ -197,7 +211,6 @@ public class AuthService {
             );
         });
 
-        // Sempre retorna um OK genérico, sem indicar nada
         return ResponseEntity.ok().build();
     }
 
