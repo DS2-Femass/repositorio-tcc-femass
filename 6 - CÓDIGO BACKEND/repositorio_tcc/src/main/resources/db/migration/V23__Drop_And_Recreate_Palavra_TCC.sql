@@ -23,3 +23,4 @@ ALTER TABLE palavra_TCC
 ADD CONSTRAINT fk_palavra_tcc_palavra_chave FOREIGN KEY (palavra_chave_id) REFERENCES palavra_chave(id) ON DELETE CASCADE;
 
 
+

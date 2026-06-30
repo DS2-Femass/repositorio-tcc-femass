@@ -17,6 +17,8 @@ import com.example.repositorioDeTcc.repository.CategoriaRepository;
 import com.example.repositorioDeTcc.repository.OrientadorRepository;
 import com.example.repositorioDeTcc.repository.PalavraChaveRepository;
 import com.example.repositorioDeTcc.repository.SubcategoriaRepository;
+import com.example.repositorioDeTcc.repository.OrientadorRepository;
+import com.example.repositorioDeTcc.repository.PalavraChaveRepository;
 import com.example.repositorioDeTcc.repository.TCCRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;

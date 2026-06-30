@@ -14,6 +14,7 @@ import { OrientadorService } from '../../service/OrientadorService';
 import { CursoService } from '../../service/CursoService';
 import { PalavraChaveService } from '../../service/PalavraChaveService';
 import { SubcategoriaService } from '../../service/SubcategoriaService';
+import { CategoriaService } from '../../service/CategoriaService';
 import { Link } from 'react-router-dom'
 
 function withNavigate(Component) {
@@ -34,6 +35,7 @@ class TCC extends Component {
         optionsOrientadores: [],
         optionsCursos: [],
         optionsPalavrasChave: [],
+        optionsCategorias: [],
         optionsSubcategorias: [],
         isCursoInvalid: false,
         selectedCurso: null,
@@ -42,6 +44,7 @@ class TCC extends Component {
         isOrientadorInvalid: false,
         selectedOrientador: null,
         selectedPalavrasChave: [],
+        selectedCategoria: null,
         selectedSubcategoria: null,
         resumo: '',
         tituloTcc: '',
@@ -54,7 +57,8 @@ class TCC extends Component {
         filterTitulo: '',
         filterAluno: '',
         filterOrientador: '',
-        filterPalavraChave: ''
+        filterPalavraChave: '',
+        filterCurso: null
     }
 
     tccService = new TCCService();
@@ -63,6 +67,7 @@ class TCC extends Component {
     cursoService = new CursoService();
     palavraChaveService = new PalavraChaveService();
     subcategoriaService = new SubcategoriaService();
+    categoriaService = new CategoriaService();
 
     columns = [
         {
@@ -142,7 +147,12 @@ class TCC extends Component {
     };
 
     clearFilters = () => {
-        this.setState({filterTitulo: '', filterAluno: '', filterOrientador: '', filterPalavraChave: ''}, this.applyFilters);
+        
+        this.setState({filterTitulo: '', filterAluno: '', filterOrientador: '', filterPalavraChave: '', filterCurso: null}, this.applyFilters);
+    }
+
+    handleFilterCursoChange = (selectedOption) => {
+        this.setState({ filterCurso: selectedOption }, this.applyFilters);
     }
 
     handleChange = (event) => {
@@ -201,11 +211,42 @@ class TCC extends Component {
     fillOptionsCursos = () => {
         this.cursoService.listAll()
             .then((response) => {
+                if (response && response.data) {
                     const optionsCursos = response.data.map(curso => ({
                         value: curso.id,
                         label: curso.nome
                     }));
                     this.setState({ optionsCursos });
+                    console.log('Cursos carregados:', optionsCursos);
+                } else {
+                    console.error('Resposta vazia ao carregar cursos');
+                    this.setState({ optionsCursos: [] });
+                }
+            })
+            .catch((error) => {
+                console.error('Erro ao carregar cursos:', error);
+                console.error('Detalhes do erro:', error.response);
+                toast.error('Erro ao carregar cursos', {
+                    position: "top-right",
+                    autoClose: 2000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                    progress: undefined,
+                });
+                this.setState({ optionsCursos: [] });
+            })
+    }
+
+    fillOptionsPalavrasChave = () => {
+        this.palavraChaveService.findAllActive()
+            .then((response) => {
+                const optionsPalavrasChave = response.data.map(palavra => ({
+                    value: palavra.id,
+                    label: palavra.nome
+                }));
+                this.setState({ optionsPalavrasChave });
             })
             .catch((error) => {
                 console.error('Erro ao carregar cursos:', error);
@@ -443,7 +484,6 @@ class TCC extends Component {
     }
 
     beginEdit = (tcc) => { 
-
         this.fillOptionsOrientadores();
         this.fillOptionsPalavrasChave();
         this.fillOptionsSubcategorias();
@@ -500,6 +540,7 @@ class TCC extends Component {
 
     componentDidMount() {
         this.fillList();
+        this.fillOptionsCursos();
     }
 
     render() {
@@ -569,7 +610,7 @@ class TCC extends Component {
                                 </div>
 
                                 <div className="row g-3">
-                                    <div className="col-md-4">
+                                    <div className="col-md-3">
                                         <div className="form-floating">
                                             <input
                                                 id="filterTitulo"
@@ -581,10 +622,9 @@ class TCC extends Component {
                                                 onChange={this.handleFilterChange}
                                             />
                                             <label htmlFor="filterTitulo">Título</label>
-                                            
                                         </div>
                                     </div>
-                                    <div className="col-md-4">
+                                    <div className="col-md-3">
                                         <div className="form-floating">
                                             <input
                                                 id="filterAluno"
@@ -598,7 +638,7 @@ class TCC extends Component {
                                             <label htmlFor="filterAluno">Aluno</label>
                                         </div>
                                     </div>
-                                    <div className="col-md-4">
+                                    <div className="col-md-3">
                                         <div className="form-floating">
                                             <input
                                                 id="filterOrientador"
@@ -610,6 +650,60 @@ class TCC extends Component {
                                                 onChange={this.handleFilterChange}
                                             />
                                             <label htmlFor="filterOrientador">Orientador</label>
+                                        </div>
+                                    </div>
+                                    <div className="col-md-3">
+                                        <Select
+                                            className="basic-single"
+                                            classNamePrefix="select"
+                                            isClearable={true}
+                                            isSearchable={true}
+                                            name="filterCurso"
+                                            options={this.state.optionsCursos}
+                                            noOptionsMessage={() => "Não há cursos cadastrados"}
+                                            placeholder="Selecione um curso..."
+                                            value={this.state.filterCurso}
+                                            onChange={this.handleFilterCursoChange}
+                                            styles={{
+                                                control: (base, state) => ({
+                                                    ...base,
+                                                    minHeight: '58px',
+                                                    height: '58px',
+                                                    borderColor: state.isFocused ? '#86b7fe' : '#ced4da',
+                                                    boxShadow: state.isFocused ? '0 0 0 0.25rem rgba(13, 110, 253, 0.25)' : 'none'
+                                                }),
+                                                valueContainer: (base) => ({
+                                                    ...base,
+                                                    height: '58px',
+                                                    padding: '0.375rem 0.75rem'
+                                                }),
+                                                input: (base) => ({
+                                                    ...base,
+                                                    margin: '0px',
+                                                    paddingTop: '0px',
+                                                    paddingBottom: '0px'
+                                                }),
+                                                placeholder: (base) => ({
+                                                    ...base,
+                                                    color: '#6c757d'
+                                                })
+                                            }}
+                                        />
+                                    </div>
+                                </div>
+                                <div className="row g-3 mt-1">
+                                    <div className="col-md-4">
+                                        <div className="form-floating">
+                                            <input
+                                                id="filterPalavraChave"
+                                                type="text"
+                                                className="form-control"
+                                                name="filterPalavraChave"
+                                                placeholder="Buscar palavra-chave..."
+                                                value={this.state.filterPalavraChave}
+                                                onChange={this.handleFilterChange}
+                                            />
+                                            <label htmlFor="filterPalavraChave">Palavra-Chave</label>
                                         </div>
                                     </div>
                                 </div>

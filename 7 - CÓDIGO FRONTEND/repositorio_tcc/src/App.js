@@ -15,6 +15,7 @@ import Users from './components/users/Users.js';
 import ResetPassword from './components/resetPassword/ResetPassword.js';
 import { useLocation } from 'react-router-dom';
 import Categoria from './components/categoria/Categoria.js';
+import Subcategoria from './components/subcategoria/Subcategoria.js';
 import MeuTCC from './components/tcc/MeuTCC.js';
 import Perfil from './components/perfil/Perfil.js';
 import FirstAccess from './components/firstAccess/FirstAccess.js';
@@ -44,6 +45,9 @@ class App extends React.Component{
     );
     const ProtectedCategoria = (props) => (
       <ProtectedRoute component={() => <ChangePassword component={Categoria} {...props} />} />
+    );
+    const ProtectedSubcategoria = (props) => (
+      <ProtectedRoute component={() => <ChangePassword component={Subcategoria} {...props} />} />
     );
     const ProtectedPalavraChave = (props) => (
       <ProtectedRoute component={() => <ChangePassword component={PalavraChave} {...props} />} />
@@ -77,6 +81,7 @@ class App extends React.Component{
             <Route exact path="/tcc" element={<ProtectedTCC />}></Route>
             <Route exact path="/meu-tcc" element={<ProtectedMeuTCC />}></Route>
             <Route exact path="/categorias" element={<ProtectedCategoria />}></Route>
+            <Route exact path="/subcategorias" element={<ProtectedSubcategoria />}></Route>
             <Route exact path="/palavras-chave" element={<ProtectedPalavraChave />}></Route>
             <Route exact path="/users" element={<ProtectedUsers />}></Route>
             <Route exact path="/reset-password" element={<ParametrizedResetPasword />}></Route>

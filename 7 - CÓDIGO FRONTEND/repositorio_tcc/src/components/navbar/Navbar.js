@@ -55,6 +55,9 @@ export default class Navbar extends Component {
                     <Link to="/categorias" className={`nav-link ${this.state.currentPageLink === 'categorias' ? 'active' : ''}`}>Categorias</Link>
                   </li>
                   <li className="nav-item">
+                    <Link to="/subcategorias" className={`nav-link ${this.state.currentPageLink === 'subcategorias' ? 'active' : ''}`}>Subcategorias</Link>
+                  </li>
+                  <li className="nav-item">
                     <Link to="/users" className={`nav-link ${this.state.currentPageLink === 'users' ? 'active' : ''}`}>Usuários</Link>
                   </li>
                   <li className="nav-item">
