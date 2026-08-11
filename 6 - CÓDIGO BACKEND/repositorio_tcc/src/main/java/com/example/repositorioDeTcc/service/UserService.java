@@ -1,3 +1,4 @@
+
 package com.example.repositorioDeTcc.service;
 
 import com.example.repositorioDeTcc.dto.UserDTO;
@@ -23,6 +24,11 @@ public class UserService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+
+        if (email == null || email.isEmpty()) {
+            throw new UsernameNotFoundException("E-mail não fornecido");
+        }
+
         UserDetails user = userRepository.findByEmail(email);
 
         if (user == null){
@@ -40,7 +46,7 @@ public class UserService implements UserDetailsService {
         UserForListDTO dto = new UserForListDTO(obj.orElseThrow(() -> new ResourceNotFoundException(id)));
         return dto;
     }
-    
+
     @Transactional(readOnly = true)
     public List<UserForListDTO> findAll(){
         List<User> list = userRepository.findAll().stream().map((detail) -> (User) detail).collect(Collectors.toList());
@@ -69,6 +75,6 @@ public class UserService implements UserDetailsService {
         entity.setEnabled(obj.getEnabled());
         entity.setMustChangePassword(obj.getMustChangePassword());
     }
-    
+
 
 }
